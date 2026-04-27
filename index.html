@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Aircraft & Pilot Compliance Tracker</title>
 
 <style>
@@ -21,74 +21,97 @@
 
 *{box-sizing:border-box}
 
-body{
+html,body{
   margin:0;
-  font-family:Arial, Helvetica, sans-serif;
-  background:var(--bg);
-  color:var(--text);
+  padding:0;
 }
 
+body{
+  font-family:Arial, Helvetica, sans-serif;
+  background:
+    radial-gradient(circle at 80% 20%, rgba(37,99,235,.10), transparent 28%),
+    linear-gradient(135deg, rgba(15,23,42,.04) 25%, transparent 25%) 0 0/40px 40px,
+    var(--bg);
+  color:var(--text);
+  min-height:100vh;
+}
+
+/* HEADER */
 header{
   background:linear-gradient(135deg,#0f172a,#1e293b);
   color:white;
-  padding:28px 20px;
+  padding:16px 20px;
+  position:relative;
+  overflow:hidden;
+}
+
+header::after{
+  content:"✈";
+  position:absolute;
+  right:40px;
+  top:-6px;
+  font-size:120px;
+  color:rgba(255,255,255,.05);
+  transform:rotate(-10deg);
+  pointer-events:none;
 }
 
 .header-inner{
-  max-width:1250px;
+  max-width:1320px;
   margin:auto;
+  position:relative;
+  z-index:1;
 }
 
 h1{
   margin:0;
-  font-size:34px;
-}
-
-.subtitle{
-  color:#cbd5e1;
-  max-width:850px;
+  font-size:30px;
+  letter-spacing:.3px;
 }
 
 .summary{
   display:flex;
-  gap:14px;
-  margin-top:20px;
+  gap:12px;
+  margin-top:14px;
   flex-wrap:wrap;
 }
 
 .summary-box{
-  min-width:145px;
-  padding:14px 18px;
-  border-radius:16px;
+  min-width:150px;
+  padding:12px 16px;
+  border-radius:14px;
   font-weight:bold;
   text-align:center;
+  box-shadow:0 4px 12px rgba(0,0,0,.15);
 }
 
-.red{background:var(--red);color:white}
-.orange{background:var(--orange);color:white}
-.green{background:var(--green);color:white}
-.blue{background:var(--blue);color:white}
-.gray{background:#475569;color:white}
+.red{background:var(--red);color:#fff}
+.orange{background:var(--orange);color:#fff}
+.green{background:var(--green);color:#fff}
+.blue{background:var(--blue);color:#fff}
+.gray{background:#475569;color:#fff}
 
+/* APP WRAPPER */
 .app{
-  max-width:1250px;
-  margin:24px auto;
-  padding:0 18px;
+  max-width:1320px;
+  margin:14px auto;
+  padding:0 16px;
 }
 
+/* TABS */
 .tabs{
   display:flex;
   gap:10px;
   flex-wrap:wrap;
-  margin-bottom:18px;
+  margin-bottom:14px;
 }
 
 .tab{
   width:auto;
   border:none;
   border-radius:999px;
-  background:white;
-  padding:11px 18px;
+  background:#fff;
+  padding:10px 16px;
   font-weight:bold;
   cursor:pointer;
   color:var(--text);
@@ -97,31 +120,33 @@ h1{
 
 .tab.active{
   background:var(--navy);
-  color:white;
+  color:#fff;
 }
 
+/* LAYOUT */
 .grid{
   display:grid;
   grid-template-columns:360px 1fr;
-  gap:20px;
+  gap:18px;
 }
 
 .panel,.card{
   background:var(--card);
-  border-radius:20px;
-  padding:20px;
+  border-radius:18px;
+  padding:18px;
   box-shadow:0 4px 16px rgba(15,23,42,.08);
 }
 
 .section-title{
-  margin:0 0 14px;
+  margin:0 0 12px;
   font-size:22px;
 }
 
+/* FORMS */
 label{
   display:block;
   font-weight:bold;
-  margin-top:13px;
+  margin-top:12px;
   font-size:14px;
 }
 
@@ -129,9 +154,14 @@ input,select,textarea,button{
   width:100%;
   margin-top:6px;
   padding:11px;
-  border-radius:11px;
+  border-radius:10px;
   border:1px solid var(--border);
   font-size:15px;
+}
+
+textarea{
+  resize:vertical;
+  min-height:90px;
 }
 
 input[type="checkbox"]{
@@ -148,19 +178,14 @@ input[type="checkbox"]{
 
 button{
   background:var(--navy);
-  color:white;
+  color:#fff;
   border:none;
   cursor:pointer;
   font-weight:bold;
 }
 
-button.secondary{
-  background:#334155;
-}
-
-button.delete{
-  background:#991b1b;
-}
+button.secondary{background:#334155}
+button.delete{background:#991b1b}
 
 button.small{
   width:auto;
@@ -168,10 +193,11 @@ button.small{
   font-size:13px;
 }
 
+/* CARDS */
 .cards{
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
-  gap:15px;
+  grid-template-columns:repeat(auto-fit,minmax(270px,1fr));
+  gap:14px;
 }
 
 .card{
@@ -190,6 +216,7 @@ button.small{
 
 .card h3{
   margin:4px 0 8px;
+  font-size:20px;
 }
 
 .badge{
@@ -198,7 +225,7 @@ button.small{
   border-radius:999px;
   font-size:12px;
   font-weight:bold;
-  color:white;
+  color:#fff;
   margin-bottom:7px;
 }
 
@@ -207,12 +234,7 @@ button.small{
   font-size:14px;
 }
 
-.row{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:12px;
-}
-
+/* UTIL */
 .hidden{display:none}
 
 .notice{
@@ -233,31 +255,33 @@ button.small{
   color:#78350f;
 }
 
-.full{
-  grid-column:1/-1;
-}
-
-.progress-list{
-  display:grid;
-  gap:10px;
-}
-
-.currency-box{
-  background:#f8fafc;
-  border:1px solid var(--border);
-  border-radius:15px;
-  padding:14px;
-}
-
-.inline-actions{
+/* DASHBOARD FIT TO SCREEN */
+#dashboardTab{
+  min-height:calc(100vh - 215px);
   display:flex;
-  gap:8px;
-  flex-wrap:wrap;
-  margin-top:10px;
+  flex-direction:column;
 }
 
+#dashboardCards{
+  flex:1;
+  overflow:auto;
+  padding-right:4px;
+}
+
+.dashboard-disclaimer{
+  margin-top:10px;
+  font-size:12px;
+  color:#64748b;
+  text-align:center;
+  padding-bottom:4px;
+}
+
+/* MOBILE */
 @media(max-width:900px){
   .grid{grid-template-columns:1fr}
+  #dashboardTab{
+    min-height:auto;
+  }
 }
 </style>
 </head>
@@ -267,10 +291,6 @@ button.small{
 <header>
   <div class="header-inner">
     <h1>Aircraft & Pilot Compliance Tracker</h1>
-    <p class="subtitle">
-      A simple owner/operator dashboard for aircraft inspections, AV1ATES-style reminders,
-      pilot currency, night currency, medicals, flight reviews, and IFR proficiency.
-    </p>
 
     <div class="summary">
       <div class="summary-box red" id="overdueCount">0 Overdue</div>
@@ -291,16 +311,19 @@ button.small{
     <button class="tab" onclick="showTab('custom')">Custom Items</button>
   </div>
 
+  <!-- DASHBOARD -->
   <section id="dashboardTab">
-    <div class="notice">
-      This app is a planning aid, not a replacement for the FARs, aircraft logbooks, maintenance records,
-      AD research, POH/AFM, mechanic guidance, or pilot responsibility.
-    </div>
     <div class="cards" id="dashboardCards"></div>
+
+    <div class="dashboard-disclaimer">
+      Planning aid only. Verify all requirements against FARs, aircraft records, ADs, POH/AFM, and qualified maintenance guidance.
+    </div>
   </section>
 
+  <!-- SETUP -->
   <section id="setupTab" class="hidden">
     <div class="grid">
+
       <div class="panel">
         <h2 class="section-title">Pilot Profile</h2>
 
@@ -317,10 +340,10 @@ button.small{
         <div class="checkbox-row"><input type="checkbox" id="instrumentRated"> Instrument Rated</div>
         <div class="checkbox-row"><input type="checkbox" id="fliesIFR"> Flies IFR</div>
         <div class="checkbox-row"><input type="checkbox" id="carriesPassengers" checked> Carries Passengers</div>
-        <div class="checkbox-row"><input type="checkbox" id="carriesNightPassengers" checked> Carries Passengers at Night</div>
+        <div class="checkbox-row"><input type="checkbox" id="carriesNightPassengers" checked> Carries Night Passengers</div>
         <div class="checkbox-row"><input type="checkbox" id="usesBasicMed"> Uses BasicMed</div>
 
-        <label>FAA Medical / BasicMed Last Completed</label>
+        <label>Medical / BasicMed Last Completed</label>
         <input id="medicalLast" type="date">
 
         <label>Flight Review Last Completed</label>
@@ -354,7 +377,7 @@ button.small{
         <div class="checkbox-row"><input type="checkbox" id="hasTransponder" checked> Transponder Equipped</div>
         <div class="checkbox-row"><input type="checkbox" id="hasELT" checked> ELT Installed</div>
         <div class="checkbox-row"><input type="checkbox" id="vorForIFR"> Uses VOR for IFR</div>
-        <div class="checkbox-row"><input type="checkbox" id="hundredHourRequired"> 100-Hour Inspection Required</div>
+        <div class="checkbox-row"><input type="checkbox" id="hundredHourRequired"> 100-Hour Required</div>
 
         <label>Annual Last Signed Off</label>
         <input id="annualLast" type="date">
@@ -362,7 +385,7 @@ button.small{
         <label>100-Hour Last Completed</label>
         <input id="hundredHourLast" type="date">
 
-        <label>Current Tach Time</label>
+        <label>Current Tach</label>
         <input id="currentTach" type="number" step="0.1">
 
         <label>100-Hour Last Tach</label>
@@ -377,35 +400,38 @@ button.small{
         <label>ELT Last Inspection</label>
         <input id="eltLast" type="date">
 
-        <label>ELT Battery Due / Expiration</label>
+        <label>ELT Battery Due</label>
         <input id="eltBatteryDue" type="date">
 
-        <label>VOR Check Last Completed</label>
+        <label>VOR Last Check</label>
         <input id="vorLast" type="date">
 
         <button onclick="saveProfile()">Save Aircraft Profile</button>
       </div>
+
     </div>
   </section>
 
+  <!-- PILOT -->
   <section id="pilotTab" class="hidden">
     <div class="warning-note">
-      Pilot rules shown are based on your profile selections. For example, instrument currency only appears if
-      “Instrument Rated” and “Flies IFR” are selected.
+      Items shown depend on your profile selections. IFR items only appear if instrument rated + flies IFR are selected.
     </div>
     <div class="cards" id="pilotCards"></div>
   </section>
 
+  <!-- AIRCRAFT -->
   <section id="aircraftTab" class="hidden">
     <div class="warning-note">
-      Aircraft reminders are based on common AV1ATES-style inspection tracking. ADs, life-limited parts,
-      recurring service instructions, and aircraft-specific requirements should be added as custom items.
+      Common AV1ATES-style inspection tracking. Add custom reminders for ADs, oil changes, databases, insurance, and recurring service items.
     </div>
     <div class="cards" id="aircraftCards"></div>
   </section>
 
+  <!-- CUSTOM -->
   <section id="customTab" class="hidden">
     <div class="grid">
+
       <div class="panel">
         <h2 class="section-title">Add Custom Item</h2>
 
@@ -416,10 +442,10 @@ button.small{
         </select>
 
         <label>Category</label>
-        <input id="customCategory" placeholder="AD, Insurance, Database, Oil Change, etc.">
+        <input id="customCategory" placeholder="Insurance, Oil Change, AD, Database">
 
         <label>Item Name</label>
-        <input id="customTitle" placeholder="GPS Database, Insurance Renewal, AD 2024-xx">
+        <input id="customTitle" placeholder="GPS Database, Insurance Renewal">
 
         <label>Last Completed</label>
         <input id="customLast" type="date">
@@ -427,10 +453,10 @@ button.small{
         <label>Due Date</label>
         <input id="customDue" type="date">
 
-        <label>Interval / Notes</label>
-        <input id="customInterval" placeholder="Every 12 months, every 50 hours, etc.">
+        <label>Interval</label>
+        <input id="customInterval" placeholder="Every 6 months, every 50 hours...">
 
-        <label>Details</label>
+        <label>Notes</label>
         <textarea id="customNotes"></textarea>
 
         <button onclick="addCustomItem()">Add Custom Item</button>
@@ -440,50 +466,50 @@ button.small{
         <h2 class="section-title">Custom Items</h2>
         <div class="cards" id="customCards"></div>
       </div>
+
     </div>
   </section>
 
 </div>
 
 <script>
-const STORAGE_KEY = "aircraftPilotComplianceTrackerV2";
-
-let activeTab = "dashboard";
+const STORAGE_KEY = "aircraftPilotComplianceTrackerV3";
 
 let profile = {
-  pilotCertificate: "Private",
-  instrumentRated: false,
-  fliesIFR: false,
-  carriesPassengers: true,
-  carriesNightPassengers: true,
-  usesBasicMed: false,
-  medicalLast: "",
-  flightReviewLast: "",
-  dayCurrencyLast: "",
-  nightCurrencyLast: "",
-  instrumentCurrencyLast: "",
-  ipcLast: "",
+  pilotCertificate:"Private",
+  instrumentRated:false,
+  fliesIFR:false,
+  carriesPassengers:true,
+  carriesNightPassengers:true,
+  usesBasicMed:false,
+  medicalLast:"",
+  flightReviewLast:"",
+  dayCurrencyLast:"",
+  nightCurrencyLast:"",
+  instrumentCurrencyLast:"",
+  ipcLast:"",
 
-  nNumber: "",
-  aircraftType: "",
-  ifrAircraft: true,
-  hasTransponder: true,
-  hasELT: true,
-  vorForIFR: false,
-  hundredHourRequired: false,
-  annualLast: "",
-  hundredHourLast: "",
-  currentTach: "",
-  hundredHourTach: "",
-  transponderLast: "",
-  staticLast: "",
-  eltLast: "",
-  eltBatteryDue: "",
-  vorLast: ""
+  nNumber:"",
+  aircraftType:"",
+  ifrAircraft:true,
+  hasTransponder:true,
+  hasELT:true,
+  vorForIFR:false,
+  hundredHourRequired:false,
+  annualLast:"",
+  hundredHourLast:"",
+  currentTach:"",
+  hundredHourTach:"",
+  transponderLast:"",
+  staticLast:"",
+  eltLast:"",
+  eltBatteryDue:"",
+  vorLast:""
 };
 
 let customItems = [];
 
+/* HELPERS */
 function todayISO(){
   return new Date().toISOString().slice(0,10);
 }
@@ -495,7 +521,7 @@ function addDays(dateString, days){
   return d.toISOString().slice(0,10);
 }
 
-function addCalendarMonthsEndOfMonth(dateString, months){
+function addCalMonths(dateString, months){
   if(!dateString) return "";
   const d = new Date(dateString + "T00:00:00");
   d.setMonth(d.getMonth() + months + 1, 0);
@@ -507,23 +533,32 @@ function daysUntil(dateString){
   const today = new Date();
   today.setHours(0,0,0,0);
   const due = new Date(dateString + "T00:00:00");
-  return Math.ceil((due - today) / (1000 * 60 * 60 * 24));
+  return Math.ceil((due - today) / 86400000);
 }
 
 function statusFor(dueDate){
   if(!dueDate) return "missing";
-  const days = daysUntil(dueDate);
-  if(days < 0) return "overdue";
-  if(days <= 30) return "warning";
+  const d = daysUntil(dueDate);
+  if(d < 0) return "overdue";
+  if(d <= 30) return "warning";
   return "current";
 }
 
 function statusText(dueDate){
   if(!dueDate) return "Date needed";
-  const days = daysUntil(dueDate);
-  if(days < 0) return `${Math.abs(days)} days overdue`;
-  if(days === 0) return "Due today";
-  return `Due in ${days} days`;
+  const d = daysUntil(dueDate);
+  if(d < 0) return `${Math.abs(d)} days overdue`;
+  if(d === 0) return "Due today";
+  return `Due in ${d} days`;
+}
+
+function esc(s){
+  return String(s || "")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
 }
 
 function save(){
@@ -536,260 +571,253 @@ function load(){
   if(saved.customItems) customItems = saved.customItems;
 }
 
-function setValue(id, value){
+function setVal(id,val){
   const el = document.getElementById(id);
   if(!el) return;
-  if(el.type === "checkbox") el.checked = !!value;
-  else el.value = value || "";
+  if(el.type === "checkbox") el.checked = !!val;
+  else el.value = val || "";
 }
 
-function getValue(id){
+function getVal(id){
   const el = document.getElementById(id);
   if(!el) return "";
   if(el.type === "checkbox") return el.checked;
   return el.value;
 }
 
-function populateForm(){
-  Object.keys(profile).forEach(key => setValue(key, profile[key]));
+function populateForms(){
+  Object.keys(profile).forEach(k => setVal(k, profile[k]));
 }
 
-function saveProfile(){
-  Object.keys(profile).forEach(key => profile[key] = getValue(key));
-  save();
-  renderAll();
-  alert("Profile saved.");
-}
-
+/* RULES */
 function pilotRules(){
-  const rules = [];
+  const arr = [];
 
   if(profile.pilotCertificate !== "Student"){
-    rules.push({
+    arr.push({
       type:"Pilot",
       category:"Proficiency",
       title:"Flight Review",
       lastDone:profile.flightReviewLast,
-      dueDate:addCalendarMonthsEndOfMonth(profile.flightReviewLast, 24),
+      dueDate:addCalMonths(profile.flightReviewLast,24),
       interval:"24 calendar months",
-      notes:"Required to act as PIC unless another qualifying check/review applies."
+      notes:"Required to act as PIC unless another qualifying event applies."
     });
   }
 
-  if(profile.usesBasicMed){
-    rules.push({
-      type:"Pilot",
-      category:"Medical",
-      title:"BasicMed Medical Exam Checklist",
-      lastDone:profile.medicalLast,
-      dueDate:addCalendarMonthsEndOfMonth(profile.medicalLast, 48),
-      interval:"48 calendar months",
-      notes:"Also track the required online BasicMed course separately if desired."
-    });
-  } else {
-    rules.push({
-      type:"Pilot",
-      category:"Medical",
-      title:"FAA Medical Certificate",
-      lastDone:profile.medicalLast,
-      dueDate:addCalendarMonthsEndOfMonth(profile.medicalLast, 24),
-      interval:"User should verify correct duration based on age, class of medical, and operation.",
-      notes:"This app defaults to 24 months. Adjust or add custom item as needed."
-    });
-  }
+  arr.push({
+    type:"Pilot",
+    category:"Medical",
+    title: profile.usesBasicMed ? "BasicMed" : "FAA Medical",
+    lastDone:profile.medicalLast,
+    dueDate:addCalMonths(profile.medicalLast, profile.usesBasicMed ? 48 : 24),
+    interval: profile.usesBasicMed ? "48 calendar months" : "Verify duration based on class/age/operation",
+    notes:"Default only. User should verify actual privileges and duration."
+  });
 
   if(profile.carriesPassengers){
-    rules.push({
+    arr.push({
       type:"Pilot",
       category:"Currency",
       title:"Day Passenger Currency",
       lastDone:profile.dayCurrencyLast,
-      dueDate:addDays(profile.dayCurrencyLast, 90),
-      interval:"3 takeoffs and landings within preceding 90 days",
-      notes:"Same category, class, and type if a type rating is required."
+      dueDate:addDays(profile.dayCurrencyLast,90),
+      interval:"3 TO/Landings in preceding 90 days",
+      notes:"Same category/class/type if required."
     });
   }
 
   if(profile.carriesNightPassengers){
-    rules.push({
+    arr.push({
       type:"Pilot",
       category:"Currency",
       title:"Night Passenger Currency",
       lastDone:profile.nightCurrencyLast,
-      dueDate:addDays(profile.nightCurrencyLast, 90),
-      interval:"3 full-stop takeoffs and landings within preceding 90 days",
-      notes:"For passengers at night. Landings must be full stop during the required night window."
+      dueDate:addDays(profile.nightCurrencyLast,90),
+      interval:"3 full-stop TO/Landings in preceding 90 days",
+      notes:"For carrying passengers at night."
     });
   }
 
   if(profile.instrumentRated && profile.fliesIFR){
-    rules.push({
+    arr.push({
       type:"Pilot",
       category:"IFR",
       title:"Instrument Currency",
       lastDone:profile.instrumentCurrencyLast,
-      dueDate:addCalendarMonthsEndOfMonth(profile.instrumentCurrencyLast, 6),
+      dueDate:addCalMonths(profile.instrumentCurrencyLast,6),
       interval:"6 calendar months",
-      notes:"Track 6 approaches, holding, and intercepting/tracking courses."
+      notes:"6 approaches + holding + intercepting/tracking."
     });
 
-    rules.push({
+    arr.push({
       type:"Pilot",
       category:"IFR",
-      title:"Instrument Proficiency Check",
+      title:"IPC",
       lastDone:profile.ipcLast,
       dueDate:"",
-      interval:"As required after instrument currency lapse",
-      notes:"No simple fixed expiration. Use when required to regain instrument privileges after lapse."
+      interval:"Condition based",
+      notes:"Use if required after lapse of instrument currency."
     });
   }
 
-  return rules;
+  return arr;
 }
 
 function aircraftRules(){
-  const rules = [];
+  const arr = [];
 
-  rules.push({
+  arr.push({
     type:"Aircraft",
     category:"Inspection",
     title:"Annual Inspection",
     lastDone:profile.annualLast,
-    dueDate:addCalendarMonthsEndOfMonth(profile.annualLast, 12),
+    dueDate:addCalMonths(profile.annualLast,12),
     interval:"12 calendar months",
-    notes:"AV1ATES: A = Annual."
+    notes:"AV1ATES A"
   });
 
   if(profile.hundredHourRequired){
-    let dueDate = "";
-    let notes = "Due every 100 hours when required. Tach-based item.";
+    let note = "Every 100 hours if required.";
     if(profile.currentTach && profile.hundredHourTach){
-      const remaining = (parseFloat(profile.hundredHourTach) + 100) - parseFloat(profile.currentTach);
-      notes += ` Estimated ${remaining.toFixed(1)} tach hours remaining.`;
+      const remaining = (parseFloat(profile.hundredHourTach)+100)-parseFloat(profile.currentTach);
+      note += ` ${remaining.toFixed(1)} hrs remaining.`;
     }
 
-    rules.push({
+    arr.push({
       type:"Aircraft",
       category:"Inspection",
       title:"100-Hour Inspection",
       lastDone:profile.hundredHourLast,
-      dueDate:dueDate,
-      interval:"Every 100 hours if required",
-      notes:notes
+      dueDate:"",
+      interval:"100 hours",
+      notes:note
     });
   }
 
   if(profile.hasTransponder){
-    rules.push({
+    arr.push({
       type:"Aircraft",
       category:"Avionics",
       title:"Transponder Check",
       lastDone:profile.transponderLast,
-      dueDate:addCalendarMonthsEndOfMonth(profile.transponderLast, 24),
+      dueDate:addCalMonths(profile.transponderLast,24),
       interval:"24 calendar months",
-      notes:"AV1ATES: T = Transponder."
+      notes:"AV1ATES T"
     });
   }
 
   if(profile.ifrAircraft){
-    rules.push({
+    arr.push({
       type:"Aircraft",
       category:"IFR",
-      title:"Altimeter / Static System Check",
+      title:"Altimeter / Static Check",
       lastDone:profile.staticLast,
-      dueDate:addCalendarMonthsEndOfMonth(profile.staticLast, 24),
+      dueDate:addCalMonths(profile.staticLast,24),
       interval:"24 calendar months",
-      notes:"AV1ATES: A = Altimeter/static for IFR."
+      notes:"AV1ATES A"
     });
   }
 
   if(profile.hasELT){
-    rules.push({
+    arr.push({
       type:"Aircraft",
       category:"Emergency",
       title:"ELT Inspection",
       lastDone:profile.eltLast,
-      dueDate:addCalendarMonthsEndOfMonth(profile.eltLast, 12),
+      dueDate:addCalMonths(profile.eltLast,12),
       interval:"12 calendar months",
-      notes:"AV1ATES: E = ELT inspection."
+      notes:"AV1ATES E"
     });
 
-    rules.push({
+    arr.push({
       type:"Aircraft",
       category:"Emergency",
       title:"ELT Battery",
       lastDone:"",
       dueDate:profile.eltBatteryDue,
-      interval:"Battery expiration/replacement date",
-      notes:"Track battery expiration or replacement requirement."
+      interval:"Battery expiration date",
+      notes:"Track battery replacement."
     });
   }
 
   if(profile.vorForIFR){
-    rules.push({
+    arr.push({
       type:"Aircraft",
       category:"IFR",
       title:"VOR Check",
       lastDone:profile.vorLast,
-      dueDate:addDays(profile.vorLast, 30),
+      dueDate:addDays(profile.vorLast,30),
       interval:"30 days",
-      notes:"AV1ATES: V = VOR check, if using VOR for IFR."
+      notes:"AV1ATES V"
     });
   }
 
-  return rules;
+  return arr;
 }
 
 function allItems(){
   return [...pilotRules(), ...aircraftRules(), ...customItems];
 }
 
+/* RENDER */
 function renderCard(item, allowDelete=false){
   const status = statusFor(item.dueDate);
-  const badgeClass = status === "overdue" ? "red" : status === "warning" ? "orange" : status === "missing" ? "gray" : "green";
-  const cardClass = status === "overdue" ? "card overdue" : status === "warning" ? "card warning" : "card";
+  const badgeClass =
+    status==="overdue" ? "red" :
+    status==="warning" ? "orange" :
+    status==="missing" ? "gray" : "green";
+
+  const cardClass =
+    status==="overdue" ? "card overdue" :
+    status==="warning" ? "card warning" : "card";
 
   return `
     <div class="${cardClass}">
       <span class="badge ${badgeClass}">
-        ${status === "overdue" ? "PAST DUE" : status === "warning" ? "DUE SOON" : status === "missing" ? "NEEDS DATE" : "CURRENT"}
+        ${status==="overdue" ? "PAST DUE" :
+          status==="warning" ? "DUE SOON" :
+          status==="missing" ? "NEEDS DATE" : "CURRENT"}
       </span>
-      <h3>${escapeHTML(item.title)}</h3>
-      <p><strong>${escapeHTML(item.type)}</strong> · ${escapeHTML(item.category)}</p>
-      <p><strong>Last Done:</strong> ${escapeHTML(item.lastDone || "Not entered")}</p>
-      <p><strong>Due:</strong> ${escapeHTML(item.dueDate || "Not fixed / depends on condition")}</p>
-      <p><strong>Status:</strong> ${escapeHTML(statusText(item.dueDate))}</p>
-      <p class="meta"><strong>Interval:</strong> ${escapeHTML(item.interval || "Not entered")}</p>
-      <p class="meta">${escapeHTML(item.notes || "")}</p>
+
+      <h3>${esc(item.title)}</h3>
+      <p><strong>${esc(item.type)}</strong> · ${esc(item.category)}</p>
+      <p><strong>Last:</strong> ${esc(item.lastDone || "Not entered")}</p>
+      <p><strong>Due:</strong> ${esc(item.dueDate || "Condition based")}</p>
+      <p><strong>Status:</strong> ${esc(statusText(item.dueDate))}</p>
+      <p class="meta"><strong>Interval:</strong> ${esc(item.interval)}</p>
+      <p class="meta">${esc(item.notes)}</p>
+
       ${allowDelete ? `<button class="delete" onclick="deleteCustomItem(${item.id})">Delete</button>` : ""}
     </div>
   `;
 }
 
-function renderList(id, items, allowDelete=false){
+function renderList(id, list, allowDelete=false){
   const el = document.getElementById(id);
   if(!el) return;
-  if(items.length === 0){
-    el.innerHTML = `<div class="panel">No items to show. Check your setup profile.</div>`;
+
+  if(list.length === 0){
+    el.innerHTML = `<div class="panel">Nothing to show.</div>`;
     return;
   }
 
-  el.innerHTML = items
+  el.innerHTML = list
     .slice()
-    .sort((a,b) => daysUntil(a.dueDate) - daysUntil(b.dueDate))
-    .map(item => renderCard(item, allowDelete))
+    .sort((a,b)=>daysUntil(a.dueDate)-daysUntil(b.dueDate))
+    .map(item=>renderCard(item, allowDelete))
     .join("");
 }
 
 function renderCounts(){
-  const items = allItems();
   let overdue=0, warning=0, current=0;
+  const items = allItems();
 
-  items.forEach(item => {
-    const s = statusFor(item.dueDate);
-    if(s === "overdue") overdue++;
-    if(s === "warning") warning++;
-    if(s === "current") current++;
+  items.forEach(i=>{
+    const s = statusFor(i.dueDate);
+    if(s==="overdue") overdue++;
+    if(s==="warning") warning++;
+    if(s==="current") current++;
   });
 
   document.getElementById("overdueCount").textContent = `${overdue} Overdue`;
@@ -799,90 +827,97 @@ function renderCounts(){
 }
 
 function renderAll(){
-  const pRules = pilotRules();
-  const aRules = aircraftRules();
-  const everything = allItems();
-
-  renderList("dashboardCards", everything);
-  renderList("pilotCards", pRules);
-  renderList("aircraftCards", aRules);
+  renderList("dashboardCards", allItems());
+  renderList("pilotCards", pilotRules());
+  renderList("aircraftCards", aircraftRules());
   renderList("customCards", customItems, true);
   renderCounts();
 }
 
-function showTab(tab){
-  activeTab = tab;
-
-  ["dashboard","setup","pilot","aircraft","custom"].forEach(t => {
-    document.getElementById(`${t}Tab`).classList.toggle("hidden", t !== tab);
+/* TABS */
+function showTab(name){
+  const names = ["dashboard","setup","pilot","aircraft","custom"];
+  names.forEach(n=>{
+    document.getElementById(n+"Tab").classList.toggle("hidden", n!==name);
   });
 
-  document.querySelectorAll(".tab").forEach(btn => btn.classList.remove("active"));
-  const index = {dashboard:0, setup:1, pilot:2, aircraft:3, custom:4}[tab];
-  document.querySelectorAll(".tab")[index].classList.add("active");
+  document.querySelectorAll(".tab").forEach(btn=>btn.classList.remove("active"));
+
+  const idx = {
+    dashboard:0,
+    setup:1,
+    pilot:2,
+    aircraft:3,
+    custom:4
+  }[name];
+
+  document.querySelectorAll(".tab")[idx].classList.add("active");
 }
 
+/* SAVE PROFILE */
+function saveProfile(){
+  Object.keys(profile).forEach(k=>profile[k]=getVal(k));
+  save();
+  renderAll();
+  alert("Saved.");
+}
+
+/* CUSTOM ITEMS */
 function addCustomItem(){
   const item = {
     id:Date.now(),
-    type:getValue("customType"),
-    category:getValue("customCategory"),
-    title:getValue("customTitle"),
-    lastDone:getValue("customLast"),
-    dueDate:getValue("customDue"),
-    interval:getValue("customInterval"),
-    notes:getValue("customNotes")
+    type:getVal("customType"),
+    category:getVal("customCategory"),
+    title:getVal("customTitle"),
+    lastDone:getVal("customLast"),
+    dueDate:getVal("customDue"),
+    interval:getVal("customInterval"),
+    notes:getVal("customNotes")
   };
 
   if(!item.title || !item.dueDate){
-    alert("Please enter at least an item name and due date.");
+    alert("Enter item name and due date.");
     return;
   }
 
   customItems.push(item);
   save();
-
-  ["customCategory","customTitle","customLast","customDue","customInterval","customNotes"].forEach(id => setValue(id,""));
   renderAll();
+
+  ["customCategory","customTitle","customLast","customDue","customInterval","customNotes"]
+    .forEach(id=>setVal(id,""));
 }
 
 function deleteCustomItem(id){
-  customItems = customItems.filter(item => item.id !== id);
+  customItems = customItems.filter(x=>x.id!==id);
   save();
   renderAll();
 }
 
-function escapeHTML(str){
-  return String(str)
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#039;");
-}
+/* INIT */
+function seedDefaults(){
+  const t = todayISO();
 
-function seedDatesIfEmpty(){
-  const today = todayISO();
+  if(!profile.flightReviewLast) profile.flightReviewLast=t;
+  if(!profile.dayCurrencyLast) profile.dayCurrencyLast=t;
+  if(!profile.nightCurrencyLast) profile.nightCurrencyLast=t;
+  if(!profile.medicalLast) profile.medicalLast=t;
+  if(!profile.instrumentCurrencyLast) profile.instrumentCurrencyLast=t;
+  if(!profile.ipcLast) profile.ipcLast=t;
 
-  if(!profile.flightReviewLast) profile.flightReviewLast = today;
-  if(!profile.dayCurrencyLast) profile.dayCurrencyLast = today;
-  if(!profile.nightCurrencyLast) profile.nightCurrencyLast = today;
-  if(!profile.medicalLast) profile.medicalLast = today;
-  if(!profile.instrumentCurrencyLast) profile.instrumentCurrencyLast = today;
-  if(!profile.ipcLast) profile.ipcLast = today;
-
-  if(!profile.annualLast) profile.annualLast = today;
-  if(!profile.transponderLast) profile.transponderLast = today;
-  if(!profile.staticLast) profile.staticLast = today;
-  if(!profile.eltLast) profile.eltLast = today;
-  if(!profile.eltBatteryDue) profile.eltBatteryDue = addCalendarMonthsEndOfMonth(today, 24);
-  if(!profile.vorLast) profile.vorLast = today;
+  if(!profile.annualLast) profile.annualLast=t;
+  if(!profile.transponderLast) profile.transponderLast=t;
+  if(!profile.staticLast) profile.staticLast=t;
+  if(!profile.eltLast) profile.eltLast=t;
+  if(!profile.vorLast) profile.vorLast=t;
+  if(!profile.eltBatteryDue) profile.eltBatteryDue=addCalMonths(t,24);
 }
 
 load();
-seedDatesIfEmpty();
-populateForm();
+seedDefaults();
+populateForms();
 renderAll();
+showTab("dashboard");
 </script>
 
 </body>

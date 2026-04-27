@@ -28,36 +28,63 @@ html,body{
 
 body{
   font-family:Arial, Helvetica, sans-serif;
-  background:
-    radial-gradient(circle at 80% 20%, rgba(37,99,235,.10), transparent 28%),
-    linear-gradient(135deg, rgba(15,23,42,.04) 25%, transparent 25%) 0 0/40px 40px,
-    var(--bg);
   color:var(--text);
   min-height:100vh;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(14,165,233,.16), transparent 24%),
+    radial-gradient(circle at 82% 12%, rgba(249,115,22,.12), transparent 20%),
+    linear-gradient(120deg, rgba(15,23,42,.88), rgba(15,23,42,.12)),
+    var(--bg);
+  position:relative;
+  overflow-x:hidden;
+}
+
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  opacity:.16;
+  background:
+    linear-gradient(90deg, transparent 49%, rgba(255,255,255,.35) 50%, transparent 51%) 0 0/90px 90px,
+    linear-gradient(0deg, transparent 49%, rgba(255,255,255,.35) 50%, transparent 51%) 0 0/90px 90px;
+}
+
+body::after{
+  content:"✈";
+  position:fixed;
+  right:7vw;
+  bottom:7vh;
+  font-size:260px;
+  line-height:1;
+  color:rgba(255,255,255,.16);
+  transform:rotate(-18deg);
+  pointer-events:none;
 }
 
 /* HEADER */
 header{
   background:linear-gradient(135deg,#0f172a,#1e293b);
   color:white;
-  padding:16px 20px;
+  padding:14px 20px;
   position:relative;
   overflow:hidden;
 }
 
 header::after{
-  content:"✈";
+  content:"N12345  ALT 029.92  HDG 270";
   position:absolute;
-  right:40px;
-  top:-6px;
-  font-size:120px;
-  color:rgba(255,255,255,.05);
-  transform:rotate(-10deg);
+  right:28px;
+  top:18px;
+  font-family:monospace;
+  font-size:20px;
+  color:rgba(255,255,255,.08);
+  letter-spacing:2px;
   pointer-events:none;
 }
 
 .header-inner{
-  max-width:1320px;
+  max-width:1360px;
   margin:auto;
   position:relative;
   z-index:1;
@@ -65,24 +92,24 @@ header::after{
 
 h1{
   margin:0;
-  font-size:30px;
+  font-size:28px;
   letter-spacing:.3px;
 }
 
 .summary{
   display:flex;
-  gap:12px;
-  margin-top:14px;
+  gap:10px;
+  margin-top:12px;
   flex-wrap:wrap;
 }
 
 .summary-box{
-  min-width:150px;
-  padding:12px 16px;
-  border-radius:14px;
+  min-width:140px;
+  padding:10px 14px;
+  border-radius:13px;
   font-weight:bold;
   text-align:center;
-  box-shadow:0 4px 12px rgba(0,0,0,.15);
+  box-shadow:0 4px 12px rgba(0,0,0,.16);
 }
 
 .red{background:var(--red);color:#fff}
@@ -91,27 +118,29 @@ h1{
 .blue{background:var(--blue);color:#fff}
 .gray{background:#475569;color:#fff}
 
-/* APP WRAPPER */
+/* APP */
 .app{
-  max-width:1320px;
-  margin:14px auto;
-  padding:0 16px;
+  max-width:1360px;
+  margin:12px auto;
+  padding:0 14px;
+  position:relative;
+  z-index:1;
 }
 
 /* TABS */
 .tabs{
   display:flex;
-  gap:10px;
+  gap:9px;
   flex-wrap:wrap;
-  margin-bottom:14px;
+  margin-bottom:12px;
 }
 
 .tab{
   width:auto;
   border:none;
   border-radius:999px;
-  background:#fff;
-  padding:10px 16px;
+  background:rgba(255,255,255,.92);
+  padding:9px 15px;
   font-weight:bold;
   cursor:pointer;
   color:var(--text);
@@ -130,38 +159,45 @@ h1{
   gap:18px;
 }
 
+.setup-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:18px;
+}
+
 .panel,.card{
-  background:var(--card);
+  background:rgba(255,255,255,.94);
   border-radius:18px;
-  padding:18px;
-  box-shadow:0 4px 16px rgba(15,23,42,.08);
+  padding:16px;
+  box-shadow:0 4px 16px rgba(15,23,42,.10);
+  backdrop-filter:blur(6px);
 }
 
 .section-title{
-  margin:0 0 12px;
-  font-size:22px;
+  margin:0 0 10px;
+  font-size:21px;
 }
 
 /* FORMS */
 label{
   display:block;
   font-weight:bold;
-  margin-top:12px;
-  font-size:14px;
+  margin-top:10px;
+  font-size:13px;
 }
 
 input,select,textarea,button{
   width:100%;
-  margin-top:6px;
-  padding:11px;
+  margin-top:5px;
+  padding:10px;
   border-radius:10px;
   border:1px solid var(--border);
-  font-size:15px;
+  font-size:14px;
 }
 
 textarea{
   resize:vertical;
-  min-height:90px;
+  min-height:80px;
 }
 
 input[type="checkbox"]{
@@ -172,8 +208,9 @@ input[type="checkbox"]{
 .checkbox-row{
   display:flex;
   align-items:center;
-  margin-top:12px;
+  margin-top:10px;
   font-weight:bold;
+  font-size:14px;
 }
 
 button{
@@ -184,24 +221,29 @@ button{
   font-weight:bold;
 }
 
-button.secondary{background:#334155}
 button.delete{background:#991b1b}
-
-button.small{
-  width:auto;
-  padding:8px 12px;
-  font-size:13px;
-}
 
 /* CARDS */
 .cards{
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(270px,1fr));
-  gap:14px;
+  grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+  gap:10px;
 }
 
 .card{
-  border-left:10px solid var(--green);
+  border-left:8px solid var(--green);
+  padding:12px 13px;
+  cursor:pointer;
+  transition:transform .18s ease, box-shadow .18s ease, max-height .22s ease;
+  max-height:178px;
+  overflow:hidden;
+}
+
+.card:hover{
+  transform:translateY(-3px) scale(1.015);
+  box-shadow:0 10px 26px rgba(15,23,42,.20);
+  max-height:420px;
+  z-index:5;
 }
 
 .card.warning{
@@ -215,73 +257,88 @@ button.small{
 }
 
 .card h3{
-  margin:4px 0 8px;
-  font-size:20px;
+  margin:3px 0 5px;
+  font-size:17px;
+  line-height:1.15;
+}
+
+.card p{
+  margin:4px 0;
+  font-size:13px;
+  line-height:1.25;
 }
 
 .badge{
   display:inline-block;
-  padding:5px 10px;
+  padding:4px 9px;
   border-radius:999px;
-  font-size:12px;
+  font-size:11px;
   font-weight:bold;
   color:#fff;
-  margin-bottom:7px;
+  margin-bottom:4px;
 }
 
 .meta{
   color:var(--muted);
-  font-size:14px;
+  font-size:12px !important;
 }
 
-/* UTIL */
+.extra-detail{
+  opacity:.2;
+  transition:opacity .18s ease;
+}
+
+.card:hover .extra-detail{
+  opacity:1;
+}
+
 .hidden{display:none}
 
-.notice{
-  padding:14px;
-  background:#e0f2fe;
-  border-left:6px solid #0284c7;
-  border-radius:14px;
-  margin-bottom:15px;
-  color:#0c4a6e;
-}
-
 .warning-note{
-  padding:14px;
+  padding:12px;
   background:#fffbeb;
   border-left:6px solid #f59e0b;
   border-radius:14px;
-  margin-bottom:15px;
+  margin-bottom:12px;
   color:#78350f;
+  font-size:14px;
 }
 
-/* DASHBOARD FIT TO SCREEN */
+/* DASHBOARD */
 #dashboardTab{
-  min-height:calc(100vh - 215px);
+  min-height:calc(100vh - 190px);
   display:flex;
   flex-direction:column;
 }
 
 #dashboardCards{
   flex:1;
-  overflow:auto;
-  padding-right:4px;
+  overflow:visible;
 }
 
 .dashboard-disclaimer{
-  margin-top:10px;
-  font-size:12px;
-  color:#64748b;
+  margin-top:8px;
+  font-size:11px;
+  color:#dbeafe;
   text-align:center;
   padding-bottom:4px;
 }
 
-/* MOBILE */
+/* HIGHLIGHT WHEN CARD TAKES USER TO SETUP */
+.highlight-field{
+  animation:flash 1.8s ease;
+  outline:3px solid #f97316;
+}
+
+@keyframes flash{
+  0%{box-shadow:0 0 0 0 rgba(249,115,22,.8)}
+  70%{box-shadow:0 0 0 12px rgba(249,115,22,0)}
+  100%{box-shadow:none}
+}
+
 @media(max-width:900px){
-  .grid{grid-template-columns:1fr}
-  #dashboardTab{
-    min-height:auto;
-  }
+  .grid,.setup-grid{grid-template-columns:1fr}
+  #dashboardTab{min-height:auto}
 }
 </style>
 </head>
@@ -311,18 +368,15 @@ button.small{
     <button class="tab" onclick="showTab('custom')">Custom Items</button>
   </div>
 
-  <!-- DASHBOARD -->
   <section id="dashboardTab">
     <div class="cards" id="dashboardCards"></div>
-
     <div class="dashboard-disclaimer">
       Planning aid only. Verify all requirements against FARs, aircraft records, ADs, POH/AFM, and qualified maintenance guidance.
     </div>
   </section>
 
-  <!-- SETUP -->
   <section id="setupTab" class="hidden">
-    <div class="grid">
+    <div class="setup-grid">
 
       <div class="panel">
         <h2 class="section-title">Pilot Profile</h2>
@@ -412,15 +466,13 @@ button.small{
     </div>
   </section>
 
-  <!-- PILOT -->
   <section id="pilotTab" class="hidden">
     <div class="warning-note">
-      Items shown depend on your profile selections. IFR items only appear if instrument rated + flies IFR are selected.
+      IFR items only appear if instrument rated + flies IFR are selected.
     </div>
     <div class="cards" id="pilotCards"></div>
   </section>
 
-  <!-- AIRCRAFT -->
   <section id="aircraftTab" class="hidden">
     <div class="warning-note">
       Common AV1ATES-style inspection tracking. Add custom reminders for ADs, oil changes, databases, insurance, and recurring service items.
@@ -428,7 +480,6 @@ button.small{
     <div class="cards" id="aircraftCards"></div>
   </section>
 
-  <!-- CUSTOM -->
   <section id="customTab" class="hidden">
     <div class="grid">
 
@@ -473,7 +524,7 @@ button.small{
 </div>
 
 <script>
-const STORAGE_KEY = "aircraftPilotComplianceTrackerV3";
+const STORAGE_KEY = "aircraftPilotComplianceTrackerV4";
 
 let profile = {
   pilotCertificate:"Private",
@@ -509,7 +560,6 @@ let profile = {
 
 let customItems = [];
 
-/* HELPERS */
 function todayISO(){
   return new Date().toISOString().slice(0,10);
 }
@@ -589,12 +639,12 @@ function populateForms(){
   Object.keys(profile).forEach(k => setVal(k, profile[k]));
 }
 
-/* RULES */
 function pilotRules(){
   const arr = [];
 
   if(profile.pilotCertificate !== "Student"){
     arr.push({
+      id:"flightReviewLast",
       type:"Pilot",
       category:"Proficiency",
       title:"Flight Review",
@@ -606,17 +656,19 @@ function pilotRules(){
   }
 
   arr.push({
+    id:"medicalLast",
     type:"Pilot",
     category:"Medical",
     title: profile.usesBasicMed ? "BasicMed" : "FAA Medical",
     lastDone:profile.medicalLast,
     dueDate:addCalMonths(profile.medicalLast, profile.usesBasicMed ? 48 : 24),
-    interval: profile.usesBasicMed ? "48 calendar months" : "Verify duration based on class/age/operation",
-    notes:"Default only. User should verify actual privileges and duration."
+    interval: profile.usesBasicMed ? "48 calendar months" : "Verify duration by class/age/operation",
+    notes:"Default only. Verify actual privileges and duration."
   });
 
   if(profile.carriesPassengers){
     arr.push({
+      id:"dayCurrencyLast",
       type:"Pilot",
       category:"Currency",
       title:"Day Passenger Currency",
@@ -629,6 +681,7 @@ function pilotRules(){
 
   if(profile.carriesNightPassengers){
     arr.push({
+      id:"nightCurrencyLast",
       type:"Pilot",
       category:"Currency",
       title:"Night Passenger Currency",
@@ -641,6 +694,7 @@ function pilotRules(){
 
   if(profile.instrumentRated && profile.fliesIFR){
     arr.push({
+      id:"instrumentCurrencyLast",
       type:"Pilot",
       category:"IFR",
       title:"Instrument Currency",
@@ -651,6 +705,7 @@ function pilotRules(){
     });
 
     arr.push({
+      id:"ipcLast",
       type:"Pilot",
       category:"IFR",
       title:"IPC",
@@ -668,6 +723,7 @@ function aircraftRules(){
   const arr = [];
 
   arr.push({
+    id:"annualLast",
     type:"Aircraft",
     category:"Inspection",
     title:"Annual Inspection",
@@ -685,6 +741,7 @@ function aircraftRules(){
     }
 
     arr.push({
+      id:"hundredHourLast",
       type:"Aircraft",
       category:"Inspection",
       title:"100-Hour Inspection",
@@ -697,6 +754,7 @@ function aircraftRules(){
 
   if(profile.hasTransponder){
     arr.push({
+      id:"transponderLast",
       type:"Aircraft",
       category:"Avionics",
       title:"Transponder Check",
@@ -709,6 +767,7 @@ function aircraftRules(){
 
   if(profile.ifrAircraft){
     arr.push({
+      id:"staticLast",
       type:"Aircraft",
       category:"IFR",
       title:"Altimeter / Static Check",
@@ -721,6 +780,7 @@ function aircraftRules(){
 
   if(profile.hasELT){
     arr.push({
+      id:"eltLast",
       type:"Aircraft",
       category:"Emergency",
       title:"ELT Inspection",
@@ -731,6 +791,7 @@ function aircraftRules(){
     });
 
     arr.push({
+      id:"eltBatteryDue",
       type:"Aircraft",
       category:"Emergency",
       title:"ELT Battery",
@@ -743,6 +804,7 @@ function aircraftRules(){
 
   if(profile.vorForIFR){
     arr.push({
+      id:"vorLast",
       type:"Aircraft",
       category:"IFR",
       title:"VOR Check",
@@ -760,7 +822,6 @@ function allItems(){
   return [...pilotRules(), ...aircraftRules(), ...customItems];
 }
 
-/* RENDER */
 function renderCard(item, allowDelete=false){
   const status = statusFor(item.dueDate);
   const badgeClass =
@@ -772,8 +833,12 @@ function renderCard(item, allowDelete=false){
     status==="overdue" ? "card overdue" :
     status==="warning" ? "card warning" : "card";
 
+  const clickAction = allowDelete
+    ? ""
+    : `onclick="goToSetting('${item.id || ""}')"`; 
+
   return `
-    <div class="${cardClass}">
+    <div class="${cardClass}" ${clickAction}>
       <span class="badge ${badgeClass}">
         ${status==="overdue" ? "PAST DUE" :
           status==="warning" ? "DUE SOON" :
@@ -782,11 +847,14 @@ function renderCard(item, allowDelete=false){
 
       <h3>${esc(item.title)}</h3>
       <p><strong>${esc(item.type)}</strong> · ${esc(item.category)}</p>
-      <p><strong>Last:</strong> ${esc(item.lastDone || "Not entered")}</p>
       <p><strong>Due:</strong> ${esc(item.dueDate || "Condition based")}</p>
       <p><strong>Status:</strong> ${esc(statusText(item.dueDate))}</p>
-      <p class="meta"><strong>Interval:</strong> ${esc(item.interval)}</p>
-      <p class="meta">${esc(item.notes)}</p>
+
+      <div class="extra-detail">
+        <p><strong>Last:</strong> ${esc(item.lastDone || "Not entered")}</p>
+        <p class="meta"><strong>Interval:</strong> ${esc(item.interval)}</p>
+        <p class="meta">${esc(item.notes)}</p>
+      </div>
 
       ${allowDelete ? `<button class="delete" onclick="deleteCustomItem(${item.id})">Delete</button>` : ""}
     </div>
@@ -834,7 +902,6 @@ function renderAll(){
   renderCounts();
 }
 
-/* TABS */
 function showTab(name){
   const names = ["dashboard","setup","pilot","aircraft","custom"];
   names.forEach(n=>{
@@ -843,18 +910,25 @@ function showTab(name){
 
   document.querySelectorAll(".tab").forEach(btn=>btn.classList.remove("active"));
 
-  const idx = {
-    dashboard:0,
-    setup:1,
-    pilot:2,
-    aircraft:3,
-    custom:4
-  }[name];
-
+  const idx = {dashboard:0,setup:1,pilot:2,aircraft:3,custom:4}[name];
   document.querySelectorAll(".tab")[idx].classList.add("active");
 }
 
-/* SAVE PROFILE */
+function goToSetting(fieldId){
+  if(!fieldId) return;
+  showTab("setup");
+
+  setTimeout(()=>{
+    const el = document.getElementById(fieldId);
+    if(el){
+      el.scrollIntoView({behavior:"smooth", block:"center"});
+      el.classList.add("highlight-field");
+      el.focus();
+      setTimeout(()=>el.classList.remove("highlight-field"), 1800);
+    }
+  },100);
+}
+
 function saveProfile(){
   Object.keys(profile).forEach(k=>profile[k]=getVal(k));
   save();
@@ -862,7 +936,6 @@ function saveProfile(){
   alert("Saved.");
 }
 
-/* CUSTOM ITEMS */
 function addCustomItem(){
   const item = {
     id:Date.now(),
@@ -894,7 +967,6 @@ function deleteCustomItem(id){
   renderAll();
 }
 
-/* INIT */
 function seedDefaults(){
   const t = todayISO();
 

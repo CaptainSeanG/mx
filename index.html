@@ -3,427 +3,886 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Aircraft & Pilot Maintenance Calendar</title>
+<title>Aircraft & Pilot Compliance Tracker</title>
+
 <style>
-  body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: #eef2f7;
-    color: #172033;
-  }
+:root{
+  --navy:#0f172a;
+  --blue:#2563eb;
+  --green:#16a34a;
+  --orange:#f97316;
+  --red:#dc2626;
+  --bg:#eef2f7;
+  --card:#ffffff;
+  --text:#172033;
+  --muted:#64748b;
+  --border:#dbe3ef;
+}
 
-  header {
-    background: #0f172a;
-    color: white;
-    padding: 28px;
-    text-align: center;
-  }
+*{box-sizing:border-box}
 
-  header h1 {
-    margin: 0;
-    font-size: 34px;
-  }
+body{
+  margin:0;
+  font-family:Arial, Helvetica, sans-serif;
+  background:var(--bg);
+  color:var(--text);
+}
 
-  .summary {
-    display: flex;
-    gap: 15px;
-    justify-content: center;
-    margin-top: 20px;
-    flex-wrap: wrap;
-  }
+header{
+  background:linear-gradient(135deg,#0f172a,#1e293b);
+  color:white;
+  padding:28px 20px;
+}
 
-  .summary div {
-    padding: 14px 24px;
-    border-radius: 14px;
-    font-weight: bold;
-  }
+.header-inner{
+  max-width:1250px;
+  margin:auto;
+}
 
-  .red { background: #dc2626; color: white; }
-  .orange { background: #f97316; color: white; }
-  .green { background: #16a34a; color: white; }
+h1{
+  margin:0;
+  font-size:34px;
+}
 
-  .container {
-    max-width: 1200px;
-    margin: 25px auto;
-    padding: 0 18px;
-    display: grid;
-    grid-template-columns: 340px 1fr;
-    gap: 20px;
-  }
+.subtitle{
+  color:#cbd5e1;
+  max-width:850px;
+}
 
-  .panel, .card {
-    background: white;
-    border-radius: 18px;
-    padding: 20px;
-    box-shadow: 0 4px 16px rgba(0,0,0,.08);
-  }
+.summary{
+  display:flex;
+  gap:14px;
+  margin-top:20px;
+  flex-wrap:wrap;
+}
 
-  label {
-    display: block;
-    font-weight: bold;
-    margin-top: 12px;
-  }
+.summary-box{
+  min-width:145px;
+  padding:14px 18px;
+  border-radius:16px;
+  font-weight:bold;
+  text-align:center;
+}
 
-  input, select, textarea, button {
-    width: 100%;
-    box-sizing: border-box;
-    margin-top: 6px;
-    padding: 11px;
-    border-radius: 10px;
-    border: 1px solid #cbd5e1;
-    font-size: 15px;
-  }
+.red{background:var(--red);color:white}
+.orange{background:var(--orange);color:white}
+.green{background:var(--green);color:white}
+.blue{background:var(--blue);color:white}
+.gray{background:#475569;color:white}
 
-  button {
-    background: #0f172a;
-    color: white;
-    border: none;
-    cursor: pointer;
-    margin-top: 18px;
-    font-weight: bold;
-  }
+.app{
+  max-width:1250px;
+  margin:24px auto;
+  padding:0 18px;
+}
 
-  .toolbar {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 15px;
-    flex-wrap: wrap;
-  }
+.tabs{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-bottom:18px;
+}
 
-  .toolbar button {
-    width: auto;
-    margin-top: 0;
-    padding: 10px 16px;
-  }
+.tab{
+  width:auto;
+  border:none;
+  border-radius:999px;
+  background:white;
+  padding:11px 18px;
+  font-weight:bold;
+  cursor:pointer;
+  color:var(--text);
+  box-shadow:0 2px 8px rgba(0,0,0,.07);
+}
 
-  .cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 15px;
-  }
+.tab.active{
+  background:var(--navy);
+  color:white;
+}
 
-  .card {
-    border-left: 10px solid #16a34a;
-  }
+.grid{
+  display:grid;
+  grid-template-columns:360px 1fr;
+  gap:20px;
+}
 
-  .card.warning {
-    background: #fff7ed;
-    border-left-color: #f97316;
-  }
+.panel,.card{
+  background:var(--card);
+  border-radius:20px;
+  padding:20px;
+  box-shadow:0 4px 16px rgba(15,23,42,.08);
+}
 
-  .card.overdue {
-    background: #fef2f2;
-    border-left-color: #dc2626;
-  }
+.section-title{
+  margin:0 0 14px;
+  font-size:22px;
+}
 
-  .card h3 {
-    margin: 0 0 8px;
-  }
+label{
+  display:block;
+  font-weight:bold;
+  margin-top:13px;
+  font-size:14px;
+}
 
-  .badge {
-    display: inline-block;
-    padding: 5px 10px;
-    border-radius: 999px;
-    color: white;
-    font-size: 12px;
-    font-weight: bold;
-    margin-bottom: 10px;
-  }
+input,select,textarea,button{
+  width:100%;
+  margin-top:6px;
+  padding:11px;
+  border-radius:11px;
+  border:1px solid var(--border);
+  font-size:15px;
+}
 
-  .small {
-    color: #475569;
-    font-size: 14px;
-  }
+input[type="checkbox"]{
+  width:auto;
+  margin-right:8px;
+}
 
-  .delete {
-    background: #991b1b;
-  }
+.checkbox-row{
+  display:flex;
+  align-items:center;
+  margin-top:12px;
+  font-weight:bold;
+}
 
-  @media (max-width: 850px) {
-    .container {
-      grid-template-columns: 1fr;
-    }
-  }
+button{
+  background:var(--navy);
+  color:white;
+  border:none;
+  cursor:pointer;
+  font-weight:bold;
+}
+
+button.secondary{
+  background:#334155;
+}
+
+button.delete{
+  background:#991b1b;
+}
+
+button.small{
+  width:auto;
+  padding:8px 12px;
+  font-size:13px;
+}
+
+.cards{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:15px;
+}
+
+.card{
+  border-left:10px solid var(--green);
+}
+
+.card.warning{
+  background:#fff7ed;
+  border-left-color:var(--orange);
+}
+
+.card.overdue{
+  background:#fef2f2;
+  border-left-color:var(--red);
+}
+
+.card h3{
+  margin:4px 0 8px;
+}
+
+.badge{
+  display:inline-block;
+  padding:5px 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:bold;
+  color:white;
+  margin-bottom:7px;
+}
+
+.meta{
+  color:var(--muted);
+  font-size:14px;
+}
+
+.row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+
+.hidden{display:none}
+
+.notice{
+  padding:14px;
+  background:#e0f2fe;
+  border-left:6px solid #0284c7;
+  border-radius:14px;
+  margin-bottom:15px;
+  color:#0c4a6e;
+}
+
+.warning-note{
+  padding:14px;
+  background:#fffbeb;
+  border-left:6px solid #f59e0b;
+  border-radius:14px;
+  margin-bottom:15px;
+  color:#78350f;
+}
+
+.full{
+  grid-column:1/-1;
+}
+
+.progress-list{
+  display:grid;
+  gap:10px;
+}
+
+.currency-box{
+  background:#f8fafc;
+  border:1px solid var(--border);
+  border-radius:15px;
+  padding:14px;
+}
+
+.inline-actions{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-top:10px;
+}
+
+@media(max-width:900px){
+  .grid{grid-template-columns:1fr}
+}
 </style>
 </head>
 
 <body>
 
 <header>
-  <h1>Aircraft & Pilot Maintenance Calendar</h1>
-  <p>Track inspections, pilot currency, medicals, flight reviews, and owner/operator reminders.</p>
+  <div class="header-inner">
+    <h1>Aircraft & Pilot Compliance Tracker</h1>
+    <p class="subtitle">
+      A simple owner/operator dashboard for aircraft inspections, AV1ATES-style reminders,
+      pilot currency, night currency, medicals, flight reviews, and IFR proficiency.
+    </p>
 
-  <div class="summary">
-    <div class="red" id="overdueCount">0 Overdue</div>
-    <div class="orange" id="warningCount">0 Due Soon</div>
-    <div class="green" id="currentCount">0 Current</div>
+    <div class="summary">
+      <div class="summary-box red" id="overdueCount">0 Overdue</div>
+      <div class="summary-box orange" id="warningCount">0 Due Soon</div>
+      <div class="summary-box green" id="currentCount">0 Current</div>
+      <div class="summary-box blue" id="totalCount">0 Total</div>
+    </div>
   </div>
 </header>
 
-<div class="container">
+<div class="app">
 
-  <section class="panel">
-    <h2>Add Item</h2>
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('dashboard')">Dashboard</button>
+    <button class="tab" onclick="showTab('setup')">Setup</button>
+    <button class="tab" onclick="showTab('pilot')">Pilot Currency</button>
+    <button class="tab" onclick="showTab('aircraft')">Aircraft Inspections</button>
+    <button class="tab" onclick="showTab('custom')">Custom Items</button>
+  </div>
 
-    <label>Type</label>
-    <select id="type">
-      <option>Aircraft</option>
-      <option>Pilot</option>
-    </select>
-
-    <label>Category</label>
-    <input id="category" placeholder="Inspection, Currency, Medical, AD, etc." />
-
-    <label>Item Name</label>
-    <input id="title" placeholder="Annual Inspection, Night Currency, ELT Battery..." />
-
-    <label>Last Completed</label>
-    <input id="lastDone" type="date" />
-
-    <label>Due Date</label>
-    <input id="dueDate" type="date" />
-
-    <label>Interval / Rule</label>
-    <input id="interval" placeholder="12 calendar months, 90 days, 24 months..." />
-
-    <label>Notes</label>
-    <textarea id="notes" placeholder="Shop, logbook reference, regulation note, etc."></textarea>
-
-    <button onclick="addItem()">Add to Calendar</button>
+  <section id="dashboardTab">
+    <div class="notice">
+      This app is a planning aid, not a replacement for the FARs, aircraft logbooks, maintenance records,
+      AD research, POH/AFM, mechanic guidance, or pilot responsibility.
+    </div>
+    <div class="cards" id="dashboardCards"></div>
   </section>
 
-  <main>
-    <div class="toolbar">
-      <button onclick="setFilter('All')">All</button>
-      <button onclick="setFilter('Aircraft')">Aircraft</button>
-      <button onclick="setFilter('Pilot')">Pilot</button>
-      <button onclick="loadDefaults()">Load Sample Items</button>
-      <button onclick="clearAll()" class="delete">Clear All</button>
-    </div>
+  <section id="setupTab" class="hidden">
+    <div class="grid">
+      <div class="panel">
+        <h2 class="section-title">Pilot Profile</h2>
 
-    <div class="cards" id="cards"></div>
-  </main>
+        <label>Certificate Level</label>
+        <select id="pilotCertificate">
+          <option>Student</option>
+          <option>Sport</option>
+          <option>Recreational</option>
+          <option selected>Private</option>
+          <option>Commercial</option>
+          <option>ATP</option>
+        </select>
+
+        <div class="checkbox-row"><input type="checkbox" id="instrumentRated"> Instrument Rated</div>
+        <div class="checkbox-row"><input type="checkbox" id="fliesIFR"> Flies IFR</div>
+        <div class="checkbox-row"><input type="checkbox" id="carriesPassengers" checked> Carries Passengers</div>
+        <div class="checkbox-row"><input type="checkbox" id="carriesNightPassengers" checked> Carries Passengers at Night</div>
+        <div class="checkbox-row"><input type="checkbox" id="usesBasicMed"> Uses BasicMed</div>
+
+        <label>FAA Medical / BasicMed Last Completed</label>
+        <input id="medicalLast" type="date">
+
+        <label>Flight Review Last Completed</label>
+        <input id="flightReviewLast" type="date">
+
+        <label>Day Passenger Currency Last Completed</label>
+        <input id="dayCurrencyLast" type="date">
+
+        <label>Night Passenger Currency Last Completed</label>
+        <input id="nightCurrencyLast" type="date">
+
+        <label>Instrument Currency Last Completed</label>
+        <input id="instrumentCurrencyLast" type="date">
+
+        <label>IPC Last Completed</label>
+        <input id="ipcLast" type="date">
+
+        <button onclick="saveProfile()">Save Pilot Profile</button>
+      </div>
+
+      <div class="panel">
+        <h2 class="section-title">Aircraft Profile</h2>
+
+        <label>N-Number</label>
+        <input id="nNumber" placeholder="N55960">
+
+        <label>Aircraft Type</label>
+        <input id="aircraftType" placeholder="Piper PA-28R-200">
+
+        <div class="checkbox-row"><input type="checkbox" id="ifrAircraft" checked> IFR Equipped / Used IFR</div>
+        <div class="checkbox-row"><input type="checkbox" id="hasTransponder" checked> Transponder Equipped</div>
+        <div class="checkbox-row"><input type="checkbox" id="hasELT" checked> ELT Installed</div>
+        <div class="checkbox-row"><input type="checkbox" id="vorForIFR"> Uses VOR for IFR</div>
+        <div class="checkbox-row"><input type="checkbox" id="hundredHourRequired"> 100-Hour Inspection Required</div>
+
+        <label>Annual Last Signed Off</label>
+        <input id="annualLast" type="date">
+
+        <label>100-Hour Last Completed</label>
+        <input id="hundredHourLast" type="date">
+
+        <label>Current Tach Time</label>
+        <input id="currentTach" type="number" step="0.1">
+
+        <label>100-Hour Last Tach</label>
+        <input id="hundredHourTach" type="number" step="0.1">
+
+        <label>Transponder Last Check</label>
+        <input id="transponderLast" type="date">
+
+        <label>Altimeter / Static Last Check</label>
+        <input id="staticLast" type="date">
+
+        <label>ELT Last Inspection</label>
+        <input id="eltLast" type="date">
+
+        <label>ELT Battery Due / Expiration</label>
+        <input id="eltBatteryDue" type="date">
+
+        <label>VOR Check Last Completed</label>
+        <input id="vorLast" type="date">
+
+        <button onclick="saveProfile()">Save Aircraft Profile</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="pilotTab" class="hidden">
+    <div class="warning-note">
+      Pilot rules shown are based on your profile selections. For example, instrument currency only appears if
+      “Instrument Rated” and “Flies IFR” are selected.
+    </div>
+    <div class="cards" id="pilotCards"></div>
+  </section>
+
+  <section id="aircraftTab" class="hidden">
+    <div class="warning-note">
+      Aircraft reminders are based on common AV1ATES-style inspection tracking. ADs, life-limited parts,
+      recurring service instructions, and aircraft-specific requirements should be added as custom items.
+    </div>
+    <div class="cards" id="aircraftCards"></div>
+  </section>
+
+  <section id="customTab" class="hidden">
+    <div class="grid">
+      <div class="panel">
+        <h2 class="section-title">Add Custom Item</h2>
+
+        <label>Type</label>
+        <select id="customType">
+          <option>Aircraft</option>
+          <option>Pilot</option>
+        </select>
+
+        <label>Category</label>
+        <input id="customCategory" placeholder="AD, Insurance, Database, Oil Change, etc.">
+
+        <label>Item Name</label>
+        <input id="customTitle" placeholder="GPS Database, Insurance Renewal, AD 2024-xx">
+
+        <label>Last Completed</label>
+        <input id="customLast" type="date">
+
+        <label>Due Date</label>
+        <input id="customDue" type="date">
+
+        <label>Interval / Notes</label>
+        <input id="customInterval" placeholder="Every 12 months, every 50 hours, etc.">
+
+        <label>Details</label>
+        <textarea id="customNotes"></textarea>
+
+        <button onclick="addCustomItem()">Add Custom Item</button>
+      </div>
+
+      <div class="panel">
+        <h2 class="section-title">Custom Items</h2>
+        <div class="cards" id="customCards"></div>
+      </div>
+    </div>
+  </section>
 
 </div>
 
 <script>
-let items = JSON.parse(localStorage.getItem("maintenanceItems")) || [];
-let filter = "All";
+const STORAGE_KEY = "aircraftPilotComplianceTrackerV2";
 
-document.getElementById("lastDone").valueAsDate = new Date();
-document.getElementById("dueDate").valueAsDate = new Date();
+let activeTab = "dashboard";
 
-function save() {
-  localStorage.setItem("maintenanceItems", JSON.stringify(items));
+let profile = {
+  pilotCertificate: "Private",
+  instrumentRated: false,
+  fliesIFR: false,
+  carriesPassengers: true,
+  carriesNightPassengers: true,
+  usesBasicMed: false,
+  medicalLast: "",
+  flightReviewLast: "",
+  dayCurrencyLast: "",
+  nightCurrencyLast: "",
+  instrumentCurrencyLast: "",
+  ipcLast: "",
+
+  nNumber: "",
+  aircraftType: "",
+  ifrAircraft: true,
+  hasTransponder: true,
+  hasELT: true,
+  vorForIFR: false,
+  hundredHourRequired: false,
+  annualLast: "",
+  hundredHourLast: "",
+  currentTach: "",
+  hundredHourTach: "",
+  transponderLast: "",
+  staticLast: "",
+  eltLast: "",
+  eltBatteryDue: "",
+  vorLast: ""
+};
+
+let customItems = [];
+
+function todayISO(){
+  return new Date().toISOString().slice(0,10);
 }
 
-function daysUntil(dateString) {
+function addDays(dateString, days){
+  if(!dateString) return "";
+  const d = new Date(dateString + "T00:00:00");
+  d.setDate(d.getDate() + days);
+  return d.toISOString().slice(0,10);
+}
+
+function addCalendarMonthsEndOfMonth(dateString, months){
+  if(!dateString) return "";
+  const d = new Date(dateString + "T00:00:00");
+  d.setMonth(d.getMonth() + months + 1, 0);
+  return d.toISOString().slice(0,10);
+}
+
+function daysUntil(dateString){
+  if(!dateString) return 99999;
   const today = new Date();
   today.setHours(0,0,0,0);
-
   const due = new Date(dateString + "T00:00:00");
   return Math.ceil((due - today) / (1000 * 60 * 60 * 24));
 }
 
-function getStatus(dueDate) {
+function statusFor(dueDate){
+  if(!dueDate) return "missing";
   const days = daysUntil(dueDate);
-  if (days < 0) return "overdue";
-  if (days <= 30) return "warning";
+  if(days < 0) return "overdue";
+  if(days <= 30) return "warning";
   return "current";
 }
 
-function statusText(dueDate) {
+function statusText(dueDate){
+  if(!dueDate) return "Date needed";
   const days = daysUntil(dueDate);
-
-  if (days < 0) return `${Math.abs(days)} days overdue`;
-  if (days === 0) return "Due today";
+  if(days < 0) return `${Math.abs(days)} days overdue`;
+  if(days === 0) return "Due today";
   return `Due in ${days} days`;
 }
 
-function addItem() {
-  const item = {
-    id: Date.now(),
-    type: document.getElementById("type").value,
-    category: document.getElementById("category").value,
-    title: document.getElementById("title").value,
-    lastDone: document.getElementById("lastDone").value,
-    dueDate: document.getElementById("dueDate").value,
-    interval: document.getElementById("interval").value,
-    notes: document.getElementById("notes").value
-  };
+function save(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({profile, customItems}));
+}
 
-  if (!item.title || !item.dueDate) {
-    alert("Please enter at least an item name and due date.");
+function load(){
+  const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+  if(saved.profile) profile = {...profile, ...saved.profile};
+  if(saved.customItems) customItems = saved.customItems;
+}
+
+function setValue(id, value){
+  const el = document.getElementById(id);
+  if(!el) return;
+  if(el.type === "checkbox") el.checked = !!value;
+  else el.value = value || "";
+}
+
+function getValue(id){
+  const el = document.getElementById(id);
+  if(!el) return "";
+  if(el.type === "checkbox") return el.checked;
+  return el.value;
+}
+
+function populateForm(){
+  Object.keys(profile).forEach(key => setValue(key, profile[key]));
+}
+
+function saveProfile(){
+  Object.keys(profile).forEach(key => profile[key] = getValue(key));
+  save();
+  renderAll();
+  alert("Profile saved.");
+}
+
+function pilotRules(){
+  const rules = [];
+
+  if(profile.pilotCertificate !== "Student"){
+    rules.push({
+      type:"Pilot",
+      category:"Proficiency",
+      title:"Flight Review",
+      lastDone:profile.flightReviewLast,
+      dueDate:addCalendarMonthsEndOfMonth(profile.flightReviewLast, 24),
+      interval:"24 calendar months",
+      notes:"Required to act as PIC unless another qualifying check/review applies."
+    });
+  }
+
+  if(profile.usesBasicMed){
+    rules.push({
+      type:"Pilot",
+      category:"Medical",
+      title:"BasicMed Medical Exam Checklist",
+      lastDone:profile.medicalLast,
+      dueDate:addCalendarMonthsEndOfMonth(profile.medicalLast, 48),
+      interval:"48 calendar months",
+      notes:"Also track the required online BasicMed course separately if desired."
+    });
+  } else {
+    rules.push({
+      type:"Pilot",
+      category:"Medical",
+      title:"FAA Medical Certificate",
+      lastDone:profile.medicalLast,
+      dueDate:addCalendarMonthsEndOfMonth(profile.medicalLast, 24),
+      interval:"User should verify correct duration based on age, class of medical, and operation.",
+      notes:"This app defaults to 24 months. Adjust or add custom item as needed."
+    });
+  }
+
+  if(profile.carriesPassengers){
+    rules.push({
+      type:"Pilot",
+      category:"Currency",
+      title:"Day Passenger Currency",
+      lastDone:profile.dayCurrencyLast,
+      dueDate:addDays(profile.dayCurrencyLast, 90),
+      interval:"3 takeoffs and landings within preceding 90 days",
+      notes:"Same category, class, and type if a type rating is required."
+    });
+  }
+
+  if(profile.carriesNightPassengers){
+    rules.push({
+      type:"Pilot",
+      category:"Currency",
+      title:"Night Passenger Currency",
+      lastDone:profile.nightCurrencyLast,
+      dueDate:addDays(profile.nightCurrencyLast, 90),
+      interval:"3 full-stop takeoffs and landings within preceding 90 days",
+      notes:"For passengers at night. Landings must be full stop during the required night window."
+    });
+  }
+
+  if(profile.instrumentRated && profile.fliesIFR){
+    rules.push({
+      type:"Pilot",
+      category:"IFR",
+      title:"Instrument Currency",
+      lastDone:profile.instrumentCurrencyLast,
+      dueDate:addCalendarMonthsEndOfMonth(profile.instrumentCurrencyLast, 6),
+      interval:"6 calendar months",
+      notes:"Track 6 approaches, holding, and intercepting/tracking courses."
+    });
+
+    rules.push({
+      type:"Pilot",
+      category:"IFR",
+      title:"Instrument Proficiency Check",
+      lastDone:profile.ipcLast,
+      dueDate:"",
+      interval:"As required after instrument currency lapse",
+      notes:"No simple fixed expiration. Use when required to regain instrument privileges after lapse."
+    });
+  }
+
+  return rules;
+}
+
+function aircraftRules(){
+  const rules = [];
+
+  rules.push({
+    type:"Aircraft",
+    category:"Inspection",
+    title:"Annual Inspection",
+    lastDone:profile.annualLast,
+    dueDate:addCalendarMonthsEndOfMonth(profile.annualLast, 12),
+    interval:"12 calendar months",
+    notes:"AV1ATES: A = Annual."
+  });
+
+  if(profile.hundredHourRequired){
+    let dueDate = "";
+    let notes = "Due every 100 hours when required. Tach-based item.";
+    if(profile.currentTach && profile.hundredHourTach){
+      const remaining = (parseFloat(profile.hundredHourTach) + 100) - parseFloat(profile.currentTach);
+      notes += ` Estimated ${remaining.toFixed(1)} tach hours remaining.`;
+    }
+
+    rules.push({
+      type:"Aircraft",
+      category:"Inspection",
+      title:"100-Hour Inspection",
+      lastDone:profile.hundredHourLast,
+      dueDate:dueDate,
+      interval:"Every 100 hours if required",
+      notes:notes
+    });
+  }
+
+  if(profile.hasTransponder){
+    rules.push({
+      type:"Aircraft",
+      category:"Avionics",
+      title:"Transponder Check",
+      lastDone:profile.transponderLast,
+      dueDate:addCalendarMonthsEndOfMonth(profile.transponderLast, 24),
+      interval:"24 calendar months",
+      notes:"AV1ATES: T = Transponder."
+    });
+  }
+
+  if(profile.ifrAircraft){
+    rules.push({
+      type:"Aircraft",
+      category:"IFR",
+      title:"Altimeter / Static System Check",
+      lastDone:profile.staticLast,
+      dueDate:addCalendarMonthsEndOfMonth(profile.staticLast, 24),
+      interval:"24 calendar months",
+      notes:"AV1ATES: A = Altimeter/static for IFR."
+    });
+  }
+
+  if(profile.hasELT){
+    rules.push({
+      type:"Aircraft",
+      category:"Emergency",
+      title:"ELT Inspection",
+      lastDone:profile.eltLast,
+      dueDate:addCalendarMonthsEndOfMonth(profile.eltLast, 12),
+      interval:"12 calendar months",
+      notes:"AV1ATES: E = ELT inspection."
+    });
+
+    rules.push({
+      type:"Aircraft",
+      category:"Emergency",
+      title:"ELT Battery",
+      lastDone:"",
+      dueDate:profile.eltBatteryDue,
+      interval:"Battery expiration/replacement date",
+      notes:"Track battery expiration or replacement requirement."
+    });
+  }
+
+  if(profile.vorForIFR){
+    rules.push({
+      type:"Aircraft",
+      category:"IFR",
+      title:"VOR Check",
+      lastDone:profile.vorLast,
+      dueDate:addDays(profile.vorLast, 30),
+      interval:"30 days",
+      notes:"AV1ATES: V = VOR check, if using VOR for IFR."
+    });
+  }
+
+  return rules;
+}
+
+function allItems(){
+  return [...pilotRules(), ...aircraftRules(), ...customItems];
+}
+
+function renderCard(item, allowDelete=false){
+  const status = statusFor(item.dueDate);
+  const badgeClass = status === "overdue" ? "red" : status === "warning" ? "orange" : status === "missing" ? "gray" : "green";
+  const cardClass = status === "overdue" ? "card overdue" : status === "warning" ? "card warning" : "card";
+
+  return `
+    <div class="${cardClass}">
+      <span class="badge ${badgeClass}">
+        ${status === "overdue" ? "PAST DUE" : status === "warning" ? "DUE SOON" : status === "missing" ? "NEEDS DATE" : "CURRENT"}
+      </span>
+      <h3>${escapeHTML(item.title)}</h3>
+      <p><strong>${escapeHTML(item.type)}</strong> · ${escapeHTML(item.category)}</p>
+      <p><strong>Last Done:</strong> ${escapeHTML(item.lastDone || "Not entered")}</p>
+      <p><strong>Due:</strong> ${escapeHTML(item.dueDate || "Not fixed / depends on condition")}</p>
+      <p><strong>Status:</strong> ${escapeHTML(statusText(item.dueDate))}</p>
+      <p class="meta"><strong>Interval:</strong> ${escapeHTML(item.interval || "Not entered")}</p>
+      <p class="meta">${escapeHTML(item.notes || "")}</p>
+      ${allowDelete ? `<button class="delete" onclick="deleteCustomItem(${item.id})">Delete</button>` : ""}
+    </div>
+  `;
+}
+
+function renderList(id, items, allowDelete=false){
+  const el = document.getElementById(id);
+  if(!el) return;
+  if(items.length === 0){
+    el.innerHTML = `<div class="panel">No items to show. Check your setup profile.</div>`;
     return;
   }
 
-  items.push(item);
-  save();
-  render();
+  el.innerHTML = items
+    .slice()
+    .sort((a,b) => daysUntil(a.dueDate) - daysUntil(b.dueDate))
+    .map(item => renderCard(item, allowDelete))
+    .join("");
 }
 
-function deleteItem(id) {
-  items = items.filter(item => item.id !== id);
-  save();
-  render();
-}
+function renderCounts(){
+  const items = allItems();
+  let overdue=0, warning=0, current=0;
 
-function setFilter(newFilter) {
-  filter = newFilter;
-  render();
-}
-
-function clearAll() {
-  if (confirm("Clear all saved items?")) {
-    items = [];
-    save();
-    render();
-  }
-}
-
-function loadDefaults() {
-  items = [
-    {
-      id: 1,
-      type: "Aircraft",
-      category: "Inspection",
-      title: "Annual Inspection",
-      lastDone: "2025-04-10",
-      dueDate: "2026-04-30",
-      interval: "12 calendar months",
-      notes: "Required for most small aircraft operating under Part 91."
-    },
-    {
-      id: 2,
-      type: "Aircraft",
-      category: "Avionics",
-      title: "Transponder Check",
-      lastDone: "2024-09-15",
-      dueDate: "2026-09-30",
-      interval: "24 calendar months",
-      notes: "Track for aircraft using transponder-required airspace."
-    },
-    {
-      id: 3,
-      type: "Aircraft",
-      category: "IFR",
-      title: "Altimeter / Static System Check",
-      lastDone: "2024-09-15",
-      dueDate: "2026-09-30",
-      interval: "24 calendar months",
-      notes: "Needed for IFR operations in controlled airspace."
-    },
-    {
-      id: 4,
-      type: "Aircraft",
-      category: "Emergency",
-      title: "ELT Inspection",
-      lastDone: "2025-06-01",
-      dueDate: "2026-06-30",
-      interval: "12 calendar months",
-      notes: "Also track ELT battery replacement separately."
-    },
-    {
-      id: 5,
-      type: "Pilot",
-      category: "Currency",
-      title: "Day Passenger Currency",
-      lastDone: "2026-02-14",
-      dueDate: "2026-05-14",
-      interval: "3 takeoffs and landings in preceding 90 days",
-      notes: "Same category/class/type if type rating required."
-    },
-    {
-      id: 6,
-      type: "Pilot",
-      category: "Currency",
-      title: "Night Passenger Currency",
-      lastDone: "2026-01-15",
-      dueDate: "2026-04-15",
-      interval: "3 full-stop night landings in preceding 90 days",
-      notes: "For carrying passengers at night."
-    },
-    {
-      id: 7,
-      type: "Pilot",
-      category: "Proficiency",
-      title: "Flight Review",
-      lastDone: "2025-03-20",
-      dueDate: "2027-03-31",
-      interval: "24 calendar months",
-      notes: "Commonly called a BFR."
-    },
-    {
-      id: 8,
-      type: "Pilot",
-      category: "IFR",
-      title: "Instrument Currency",
-      lastDone: "2026-02-01",
-      dueDate: "2026-08-31",
-      interval: "6 calendar months",
-      notes: "Track approaches, holding, and intercepting/tracking."
-    }
-  ];
-
-  save();
-  render();
-}
-
-function render() {
-  const cards = document.getElementById("cards");
-  cards.innerHTML = "";
-
-  let overdue = 0;
-  let warning = 0;
-  let current = 0;
-
-  const visibleItems = items
-    .filter(item => filter === "All" || item.type === filter)
-    .sort((a, b) => daysUntil(a.dueDate) - daysUntil(b.dueDate));
-
-  visibleItems.forEach(item => {
-    const status = getStatus(item.dueDate);
-
-    if (status === "overdue") overdue++;
-    if (status === "warning") warning++;
-    if (status === "current") current++;
-
-    const badgeClass =
-      status === "overdue" ? "red" :
-      status === "warning" ? "orange" :
-      "green";
-
-    const card = document.createElement("div");
-    card.className = `card ${status === "warning" ? "warning" : ""} ${status === "overdue" ? "overdue" : ""}`;
-
-    card.innerHTML = `
-      <span class="badge ${badgeClass}">
-        ${status === "overdue" ? "PAST DUE" : status === "warning" ? "DUE SOON" : "CURRENT"}
-      </span>
-
-      <h3>${item.title}</h3>
-
-      <p><strong>${item.type}</strong> · ${item.category}</p>
-
-      <p><strong>Last Done:</strong> ${item.lastDone || "Not entered"}</p>
-      <p><strong>Due Date:</strong> ${item.dueDate}</p>
-      <p><strong>Status:</strong> ${statusText(item.dueDate)}</p>
-
-      <p class="small"><strong>Interval:</strong> ${item.interval || "Not entered"}</p>
-      <p class="small">${item.notes || ""}</p>
-
-      <button class="delete" onclick="deleteItem(${item.id})">Delete</button>
-    `;
-
-    cards.appendChild(card);
+  items.forEach(item => {
+    const s = statusFor(item.dueDate);
+    if(s === "overdue") overdue++;
+    if(s === "warning") warning++;
+    if(s === "current") current++;
   });
 
   document.getElementById("overdueCount").textContent = `${overdue} Overdue`;
   document.getElementById("warningCount").textContent = `${warning} Due Soon`;
   document.getElementById("currentCount").textContent = `${current} Current`;
+  document.getElementById("totalCount").textContent = `${items.length} Total`;
 }
 
-render();
+function renderAll(){
+  const pRules = pilotRules();
+  const aRules = aircraftRules();
+  const everything = allItems();
+
+  renderList("dashboardCards", everything);
+  renderList("pilotCards", pRules);
+  renderList("aircraftCards", aRules);
+  renderList("customCards", customItems, true);
+  renderCounts();
+}
+
+function showTab(tab){
+  activeTab = tab;
+
+  ["dashboard","setup","pilot","aircraft","custom"].forEach(t => {
+    document.getElementById(`${t}Tab`).classList.toggle("hidden", t !== tab);
+  });
+
+  document.querySelectorAll(".tab").forEach(btn => btn.classList.remove("active"));
+  const index = {dashboard:0, setup:1, pilot:2, aircraft:3, custom:4}[tab];
+  document.querySelectorAll(".tab")[index].classList.add("active");
+}
+
+function addCustomItem(){
+  const item = {
+    id:Date.now(),
+    type:getValue("customType"),
+    category:getValue("customCategory"),
+    title:getValue("customTitle"),
+    lastDone:getValue("customLast"),
+    dueDate:getValue("customDue"),
+    interval:getValue("customInterval"),
+    notes:getValue("customNotes")
+  };
+
+  if(!item.title || !item.dueDate){
+    alert("Please enter at least an item name and due date.");
+    return;
+  }
+
+  customItems.push(item);
+  save();
+
+  ["customCategory","customTitle","customLast","customDue","customInterval","customNotes"].forEach(id => setValue(id,""));
+  renderAll();
+}
+
+function deleteCustomItem(id){
+  customItems = customItems.filter(item => item.id !== id);
+  save();
+  renderAll();
+}
+
+function escapeHTML(str){
+  return String(str)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+function seedDatesIfEmpty(){
+  const today = todayISO();
+
+  if(!profile.flightReviewLast) profile.flightReviewLast = today;
+  if(!profile.dayCurrencyLast) profile.dayCurrencyLast = today;
+  if(!profile.nightCurrencyLast) profile.nightCurrencyLast = today;
+  if(!profile.medicalLast) profile.medicalLast = today;
+  if(!profile.instrumentCurrencyLast) profile.instrumentCurrencyLast = today;
+  if(!profile.ipcLast) profile.ipcLast = today;
+
+  if(!profile.annualLast) profile.annualLast = today;
+  if(!profile.transponderLast) profile.transponderLast = today;
+  if(!profile.staticLast) profile.staticLast = today;
+  if(!profile.eltLast) profile.eltLast = today;
+  if(!profile.eltBatteryDue) profile.eltBatteryDue = addCalendarMonthsEndOfMonth(today, 24);
+  if(!profile.vorLast) profile.vorLast = today;
+}
+
+load();
+seedDatesIfEmpty();
+populateForm();
+renderAll();
 </script>
 
 </body>

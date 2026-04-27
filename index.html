@@ -1,0 +1,330 @@
+import React, { useMemo, useState } from "react";
+import { CalendarDays, Plane, User, AlertTriangle, CheckCircle2, Plus, Clock, Moon, Wrench, Search } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+
+const today = new Date();
+const MS_PER_DAY = 1000 * 60 * 60 * 24;
+
+function addMonths(dateString, months) {
+  const d = new Date(dateString + "T00:00:00");
+  d.setMonth(d.getMonth() + months);
+  return d.toISOString().slice(0, 10);
+}
+
+function addDays(dateString, days) {
+  const d = new Date(dateString + "T00:00:00");
+  d.setDate(d.getDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+
+function daysUntil(dateString) {
+  const due = new Date(dateString + "T00:00:00");
+  const now = new Date(today.toISOString().slice(0, 10) + "T00:00:00");
+  return Math.ceil((due - now) / MS_PER_DAY);
+}
+
+function statusFor(dateString) {
+  const days = daysUntil(dateString);
+  if (days < 0) return "overdue";
+  if (days <= 30) return "warning";
+  return "ok";
+}
+
+const defaultItems = [
+  {
+    id: 1,
+    type: "Aircraft",
+    category: "Inspection",
+    title: "Annual Inspection",
+    lastDone: "2025-04-10",
+    dueDate: addMonths("2025-04-10", 12),
+    interval: "12 calendar months",
+    notes: "Required for most standard Part 91 aircraft operations.",
+    icon: Wrench,
+  },
+  {
+    id: 2,
+    type: "Aircraft",
+    category: "Avionics",
+    title: "Transponder Check",
+    lastDone: "2024-09-15",
+    dueDate: addMonths("2024-09-15", 24),
+    interval: "24 calendar months",
+    notes: "Required for transponder use under applicable operations.",
+    icon: Plane,
+  },
+  {
+    id: 3,
+    type: "Aircraft",
+    category: "IFR",
+    title: "Altimeter / Static System",
+    lastDone: "2024-09-15",
+    dueDate: addMonths("2024-09-15", 24),
+    interval: "24 calendar months",
+    notes: "Track this for IFR in controlled airspace.",
+    icon: Plane,
+  },
+  {
+    id: 4,
+    type: "Aircraft",
+    category: "Emergency",
+    title: "ELT Inspection",
+    lastDone: "2025-06-01",
+    dueDate: addMonths("2025-06-01", 12),
+    interval: "12 calendar months",
+    notes: "Also track ELT battery replacement/expiration separately.",
+    icon: AlertTriangle,
+  },
+  {
+    id: 5,
+    type: "Pilot",
+    category: "Currency",
+    title: "Day Passenger Currency",
+    lastDone: "2026-02-14",
+    dueDate: addDays("2026-02-14", 90),
+    interval: "3 takeoffs/landings in preceding 90 days",
+    notes: "Sole manipulator, same category/class/type if required.",
+    icon: User,
+  },
+  {
+    id: 6,
+    type: "Pilot",
+    category: "Currency",
+    title: "Night Passenger Currency",
+    lastDone: "2026-01-15",
+    dueDate: addDays("2026-01-15", 90),
+    interval: "3 full-stop night landings in preceding 90 days",
+    notes: "For carrying passengers at night: 1 hour after sunset to 1 hour before sunrise.",
+    icon: Moon,
+  },
+  {
+    id: 7,
+    type: "Pilot",
+    category: "Proficiency",
+    title: "Flight Review",
+    lastDone: "2025-03-20",
+    dueDate: addMonths("2025-03-20", 24),
+    interval: "24 calendar months",
+    notes: "Commonly called BFR, but the regulation calls it a flight review.",
+    icon: User,
+  },
+  {
+    id: 8,
+    type: "Pilot",
+    category: "IFR",
+    title: "Instrument Currency",
+    lastDone: "2026-02-01",
+    dueDate: addMonths("2026-02-01", 6),
+    interval: "6 calendar months",
+    notes: "Track approaches, holding, and intercepting/tracking. IPC may be needed if lapsed beyond grace period.",
+    icon: Clock,
+  },
+];
+
+function statusClasses(status) {
+  if (status === "overdue") return "border-red-300 bg-red-50 text-red-900";
+  if (status === "warning") return "border-orange-300 bg-orange-50 text-orange-900";
+  return "border-emerald-200 bg-white text-slate-800";
+}
+
+function badgeClasses(status) {
+  if (status === "overdue") return "bg-red-600 text-white";
+  if (status === "warning") return "bg-orange-500 text-white";
+  return "bg-emerald-600 text-white";
+}
+
+function formatDue(dateString) {
+  const days = daysUntil(dateString);
+  if (days < 0) return `${Math.abs(days)} days overdue`;
+  if (days === 0) return "Due today";
+  return `Due in ${days} days`;
+}
+
+export default function AircraftPilotMaintenanceCalendar() {
+  const [items, setItems] = useState(defaultItems);
+  const [filter, setFilter] = useState("All");
+  const [query, setQuery] = useState("");
+  const [form, setForm] = useState({
+    type: "Aircraft",
+    category: "Inspection",
+    title: "",
+    lastDone: today.toISOString().slice(0, 10),
+    dueDate: today.toISOString().slice(0, 10),
+    interval: "",
+    notes: "",
+  });
+
+  const sorted = useMemo(() => {
+    return [...items]
+      .filter((item) => filter === "All" || item.type === filter)
+      .filter((item) => `${item.title} ${item.category} ${item.notes}`.toLowerCase().includes(query.toLowerCase()))
+      .sort((a, b) => daysUntil(a.dueDate) - daysUntil(b.dueDate));
+  }, [items, filter, query]);
+
+  const counts = useMemo(() => {
+    return items.reduce(
+      (acc, item) => {
+        acc[statusFor(item.dueDate)] += 1;
+        return acc;
+      },
+      { overdue: 0, warning: 0, ok: 0 }
+    );
+  }, [items]);
+
+  function addItem(e) {
+    e.preventDefault();
+    if (!form.title.trim()) return;
+    setItems([
+      ...items,
+      {
+        id: Date.now(),
+        ...form,
+        icon: form.type === "Pilot" ? User : Wrench,
+      },
+    ]);
+    setForm({ ...form, title: "", notes: "", interval: "" });
+  }
+
+  return (
+    <div className="min-h-screen bg-slate-100 p-6 text-slate-900">
+      <div className="mx-auto max-w-7xl space-y-6">
+        <header className="rounded-3xl bg-slate-950 p-8 text-white shadow-xl">
+          <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+            <div>
+              <div className="mb-3 flex items-center gap-2 text-sm uppercase tracking-[0.25em] text-slate-300">
+                <Plane className="h-4 w-4" /> Aircraft + Pilot Compliance
+              </div>
+              <h1 className="text-4xl font-bold tracking-tight md:text-5xl">Maintenance Calendar</h1>
+              <p className="mt-3 max-w-2xl text-slate-300">
+                Track aircraft inspections, avionics checks, pilot currency, medicals, flight reviews, and custom owner/operator reminders.
+              </p>
+            </div>
+            <div className="grid grid-cols-3 gap-3 text-center">
+              <div className="rounded-2xl bg-red-600 p-4">
+                <div className="text-3xl font-bold">{counts.overdue}</div>
+                <div className="text-xs uppercase tracking-wider">Overdue</div>
+              </div>
+              <div className="rounded-2xl bg-orange-500 p-4">
+                <div className="text-3xl font-bold">{counts.warning}</div>
+                <div className="text-xs uppercase tracking-wider">Due Soon</div>
+              </div>
+              <div className="rounded-2xl bg-emerald-600 p-4">
+                <div className="text-3xl font-bold">{counts.ok}</div>
+                <div className="text-xs uppercase tracking-wider">Current</div>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <section className="grid gap-6 lg:grid-cols-[380px_1fr]">
+          <Card className="rounded-3xl shadow-md">
+            <CardContent className="p-6">
+              <div className="mb-5 flex items-center gap-2">
+                <Plus className="h-5 w-5" />
+                <h2 className="text-xl font-semibold">Add Compliance Item</h2>
+              </div>
+              <form onSubmit={addItem} className="space-y-4">
+                <div className="grid grid-cols-2 gap-3">
+                  <label className="space-y-1 text-sm font-medium">
+                    Type
+                    <select className="w-full rounded-xl border p-3" value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}>
+                      <option>Aircraft</option>
+                      <option>Pilot</option>
+                    </select>
+                  </label>
+                  <label className="space-y-1 text-sm font-medium">
+                    Category
+                    <input className="w-full rounded-xl border p-3" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} />
+                  </label>
+                </div>
+                <label className="space-y-1 text-sm font-medium block">
+                  Item Name
+                  <input className="w-full rounded-xl border p-3" placeholder="e.g. ELT Battery, Medical, AD 2024-xx" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  <label className="space-y-1 text-sm font-medium">
+                    Last Done
+                    <input type="date" className="w-full rounded-xl border p-3" value={form.lastDone} onChange={(e) => setForm({ ...form, lastDone: e.target.value })} />
+                  </label>
+                  <label className="space-y-1 text-sm font-medium">
+                    Due Date
+                    <input type="date" className="w-full rounded-xl border p-3" value={form.dueDate} onChange={(e) => setForm({ ...form, dueDate: e.target.value })} />
+                  </label>
+                </div>
+                <label className="space-y-1 text-sm font-medium block">
+                  Interval / Rule
+                  <input className="w-full rounded-xl border p-3" placeholder="12 calendar months" value={form.interval} onChange={(e) => setForm({ ...form, interval: e.target.value })} />
+                </label>
+                <label className="space-y-1 text-sm font-medium block">
+                  Notes
+                  <textarea className="min-h-24 w-full rounded-xl border p-3" placeholder="Add limitations, logbook reference, shop, or regulation note" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
+                </label>
+                <Button className="w-full rounded-xl p-6 text-base" type="submit">Add to Calendar</Button>
+              </form>
+            </CardContent>
+          </Card>
+
+          <div className="space-y-4">
+            <div className="flex flex-col gap-3 rounded-3xl bg-white p-4 shadow-md md:flex-row md:items-center md:justify-between">
+              <div className="flex gap-2">
+                {['All', 'Aircraft', 'Pilot'].map((f) => (
+                  <button key={f} onClick={() => setFilter(f)} className={`rounded-full px-4 py-2 text-sm font-semibold ${filter === f ? 'bg-slate-950 text-white' : 'bg-slate-100 text-slate-700'}`}>
+                    {f}
+                  </button>
+                ))}
+              </div>
+              <div className="relative">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                <input className="w-full rounded-full border py-2 pl-10 pr-4 md:w-80" placeholder="Search items..." value={query} onChange={(e) => setQuery(e.target.value)} />
+              </div>
+            </div>
+
+            <div className="grid gap-4 xl:grid-cols-2">
+              {sorted.map((item) => {
+                const status = statusFor(item.dueDate);
+                const Icon = item.icon || CalendarDays;
+                return (
+                  <Card key={item.id} className={`rounded-3xl border-2 shadow-sm ${statusClasses(status)}`}>
+                    <CardContent className="p-5">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-start gap-3">
+                          <div className="rounded-2xl bg-white/70 p-3 shadow-sm"><Icon className="h-6 w-6" /></div>
+                          <div>
+                            <div className="text-xs font-bold uppercase tracking-wider opacity-70">{item.type} · {item.category}</div>
+                            <h3 className="text-xl font-bold">{item.title}</h3>
+                          </div>
+                        </div>
+                        <span className={`whitespace-nowrap rounded-full px-3 py-1 text-xs font-bold uppercase ${badgeClasses(status)}`}>
+                          {status === "ok" ? "Current" : status === "warning" ? "Due Soon" : "Past Due"}
+                        </span>
+                      </div>
+
+                      <div className="mt-5 grid grid-cols-2 gap-3 text-sm">
+                        <div className="rounded-2xl bg-white/70 p-3">
+                          <div className="text-xs uppercase opacity-60">Last Done</div>
+                          <div className="font-semibold">{item.lastDone}</div>
+                        </div>
+                        <div className="rounded-2xl bg-white/70 p-3">
+                          <div className="text-xs uppercase opacity-60">Due Date</div>
+                          <div className="font-semibold">{item.dueDate}</div>
+                        </div>
+                      </div>
+
+                      <div className="mt-4 flex items-center gap-2 text-lg font-bold">
+                        {status === "ok" ? <CheckCircle2 className="h-5 w-5" /> : <AlertTriangle className="h-5 w-5" />}
+                        {formatDue(item.dueDate)}
+                      </div>
+                      <p className="mt-2 text-sm opacity-80"><strong>Interval:</strong> {item.interval}</p>
+                      <p className="mt-1 text-sm opacity-80">{item.notes}</p>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+}

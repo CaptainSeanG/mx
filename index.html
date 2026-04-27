@@ -187,6 +187,10 @@ input[type=checkbox]{
   margin-right:8px;
 }
 
+input[type=file]{
+  background:#fff;
+}
+
 .checkbox-row{
   display:flex;
   align-items:center;
@@ -205,6 +209,14 @@ button{
 
 button.delete{
   background:#991b1b;
+}
+
+button.backup{
+  background:#2563eb;
+}
+
+button.restore{
+  background:#16a34a;
 }
 
 .cards{
@@ -312,6 +324,19 @@ body.dashboard-active #dashboardTab{
   padding:0;
 }
 
+.data-tools{
+  margin-top:18px;
+  padding-top:14px;
+  border-top:1px solid var(--border);
+}
+
+.data-tools p{
+  margin:6px 0 10px;
+  font-size:13px;
+  color:var(--muted);
+  line-height:1.35;
+}
+
 .highlight-field{
   outline:3px solid #f97316;
   animation:flash 1.5s ease;
@@ -404,6 +429,17 @@ body.dashboard-active #dashboardTab{
         <input id="instrumentCurrencyLast" type="date">
 
         <button onclick="saveProfile()">Save Pilot Profile</button>
+
+        <div class="data-tools">
+          <h2 class="section-title">Backup / Restore</h2>
+          <p>Data is saved in this browser. Use backup/restore to move it to another computer or protect against browser data loss.</p>
+
+          <button class="backup" onclick="backupData()">Backup My Data</button>
+
+          <label>Restore Backup File</label>
+          <input id="restoreFile" type="file" accept="application/json">
+          <button class="restore" onclick="restoreData()">Restore My Data</button>
+        </div>
       </div>
 
       <div class="panel">
@@ -482,7 +518,8 @@ body.dashboard-active #dashboardTab{
 </div>
 
 <script>
-const STORAGE_KEY="aircraftPilotTrackerTabsV4";
+const STORAGE_KEY="aircraftPilotTrackerTabsV5";
+const DEFAULT_EXPIRED_DATE="2020-01-01";
 
 let profile={
   pilotCertificate:"Private",
@@ -787,17 +824,30 @@ function saveProfile(){
 }
 
 function addCustomItem(){
+  let title=getVal("customTitle");
+  let due=getVal("customDue");
+
+  if(!title || !due){
+    alert("Please enter an item name and due date.");
+    return;
+  }
+
   customItems.push({
     id:Date.now(),
     type:getVal("customType"),
     category:getVal("customCategory"),
-    title:getVal("customTitle"),
-    dueDate:getVal("customDue"),
+    title:title,
+    dueDate:due,
     notes:getVal("customNotes")
   });
 
   save();
   renderAll();
+
+  setVal("customCategory","");
+  setVal("customTitle","");
+  setVal("customDue","");
+  setVal("customNotes","");
 }
 
 function deleteCustomItem(id){
@@ -806,9 +856,74 @@ function deleteCustomItem(id){
   renderAll();
 }
 
-function seed(){
-  let t=todayISO();
+function backupData(){
+  save();
 
+  const data={
+    app:"Aircraft & Pilot Compliance Tracker",
+    version:"2.0",
+    exportedAt:new Date().toISOString(),
+    profile:profile,
+    customItems:customItems
+  };
+
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+
+  const aircraft=profile.nNumber ? profile.nNumber.replace(/[^a-z0-9]/gi,"") : "aircraft";
+  const date=todayISO();
+
+  a.href=url;
+  a.download=`pilot-aircraft-compliance-backup-${aircraft}-${date}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function restoreData(){
+  const input=document.getElementById("restoreFile");
+  const file=input.files[0];
+
+  if(!file){
+    alert("Please choose a backup JSON file first.");
+    return;
+  }
+
+  const reader=new FileReader();
+
+  reader.onload=function(e){
+    try{
+      const data=JSON.parse(e.target.result);
+
+      if(!data.profile){
+        alert("This does not look like a valid backup file.");
+        return;
+      }
+
+      if(!confirm("Restore this backup? This will replace the current saved data in this browser.")){
+        return;
+      }
+
+      profile={...profile,...data.profile};
+      customItems=Array.isArray(data.customItems) ? data.customItems : [];
+
+      save();
+      populate();
+      renderAll();
+      showTab("dashboard");
+
+      alert("Backup restored successfully.");
+    }catch(err){
+      alert("Could not read this backup file.");
+    }
+  };
+
+  reader.readAsText(file);
+}
+
+function seed(){
   [
     "flightReviewLast",
     "medicalLast",
@@ -820,10 +935,10 @@ function seed(){
     "staticLast",
     "eltLast"
   ].forEach(k=>{
-    if(!profile[k])profile[k]=t;
+    if(!profile[k])profile[k]=DEFAULT_EXPIRED_DATE;
   });
 
-  if(!profile.eltBatteryDue)profile.eltBatteryDue=addMonths(t,24);
+  if(!profile.eltBatteryDue)profile.eltBatteryDue=DEFAULT_EXPIRED_DATE;
 }
 
 load();

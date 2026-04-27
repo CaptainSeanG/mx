@@ -50,7 +50,7 @@ body::after{
 header{
   background:linear-gradient(135deg,#0f172a,#1e293b);
   color:#fff;
-  padding:14px 18px 8px;
+  padding:12px 18px 8px;
 }
 
 .header-inner{
@@ -60,14 +60,14 @@ header{
 
 h1{
   margin:0;
-  font-size:28px;
+  font-size:26px;
 }
 
 .summary{
   display:flex;
   gap:10px;
   flex-wrap:wrap;
-  margin-top:12px;
+  margin-top:10px;
 }
 
 body:not(.dashboard-active) .summary{
@@ -75,11 +75,12 @@ body:not(.dashboard-active) .summary{
 }
 
 .summary-box{
-  min-width:140px;
-  padding:10px 14px;
+  min-width:132px;
+  padding:9px 12px;
   border-radius:12px;
   font-weight:bold;
   text-align:center;
+  font-size:14px;
 }
 
 .red{background:var(--red);color:#fff}
@@ -96,25 +97,28 @@ body:not(.dashboard-active) .summary{
 
 .tabs{
   display:flex;
-  gap:4px;
+  gap:3px;
   align-items:flex-end;
-  padding-top:8px;
-  margin-bottom:10px;
-  overflow-x:auto;
+  padding-top:7px;
+  margin-bottom:8px;
+  overflow:visible;
+  flex-wrap:wrap;
 }
 
 .tab{
   border:none;
   color:#fff;
-  padding:7px 13px 8px;
-  font-size:13px;
+  padding:6px 10px 7px;
+  font-size:12px;
   font-weight:bold;
   cursor:pointer;
-  border-radius:10px 10px 0 0;
-  min-width:max-content;
-  transform:translateY(4px);
+  border-radius:8px 8px 0 0;
+  min-width:auto;
+  width:auto;
+  transform:translateY(3px);
   transition:.15s ease;
-  opacity:.82;
+  opacity:.84;
+  white-space:nowrap;
 }
 
 .tab:nth-child(1){background:var(--blue);}
@@ -130,7 +134,7 @@ body:not(.dashboard-active) .summary{
 .tab.active{
   opacity:1;
   transform:translateY(0);
-  box-shadow:0 6px 14px rgba(0,0,0,.16);
+  box-shadow:0 5px 12px rgba(0,0,0,.16);
 }
 
 .panel,.card{
@@ -264,13 +268,16 @@ button.delete{
 }
 
 .hidden{
-  display:none;
+  display:none !important;
 }
 
 #dashboardTab{
-  min-height:calc(100vh - 185px);
-  display:flex;
+  min-height:calc(100vh - 175px);
   flex-direction:column;
+}
+
+body.dashboard-active #dashboardTab{
+  display:flex;
 }
 
 #dashboardCards{
@@ -304,6 +311,11 @@ button.delete{
 @media(max-width:900px){
   .setup-grid,.grid{
     grid-template-columns:1fr;
+  }
+
+  .tab{
+    font-size:11px;
+    padding:6px 8px 7px;
   }
 }
 </style>
@@ -457,7 +469,7 @@ button.delete{
 </div>
 
 <script>
-const STORAGE_KEY="aircraftPilotTrackerTabsV2";
+const STORAGE_KEY="aircraftPilotTrackerTabsV3";
 
 let profile={
   pilotCertificate:"Private",
@@ -805,7 +817,6 @@ load();
 seed();
 populate();
 renderAll();
-document.body.classList.add("dashboard-active");
 showTab("dashboard");
 </script>
 

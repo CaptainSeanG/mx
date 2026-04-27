@@ -464,6 +464,10 @@ body.dashboard-active #dashboardTab{display:flex}
         <label>ELT Battery Due</label>
         <input id="eltBatteryDue" type="date">
 
+        <label>VOR Check Last Completed</label>
+        <input id="vorLast" type="date">
+        <div class="helper">Shown when the pilot profile has “Flies IFR” selected.</div>
+
         <button onclick="saveProfile()">Save Aircraft Profile</button>
       </div>
     </div>
@@ -512,7 +516,7 @@ body.dashboard-active #dashboardTab{display:flex}
 </div>
 
 <script>
-const STORAGE_KEY="aircraftPilotTrackerTabsV6";
+const STORAGE_KEY="aircraftPilotTrackerTabsV7";
 const DEFAULT_EXPIRED_DATE="2020-01-01";
 
 let profile={
@@ -538,7 +542,8 @@ let profile={
   transponderLast:"",
   staticLast:"",
   eltLast:"",
-  eltBatteryDue:""
+  eltBatteryDue:"",
+  vorLast:""
 };
 
 let customItems=[];
@@ -814,6 +819,17 @@ function aircraftRules(){
     });
   }
 
+  if(profile.fliesIFR){
+    a.push({
+      id:"vorLast",
+      type:"Aircraft",
+      category:"IFR",
+      title:"VOR Check",
+      dueDate:addDays(profile.vorLast,30),
+      notes:"30 days when using VOR equipment for IFR operations."
+    });
+  }
+
   return a;
 }
 
@@ -942,7 +958,7 @@ function backupData(){
 
   const data={
     app:"Aircraft & Pilot Compliance Tracker",
-    version:"2.1",
+    version:"2.2",
     exportedAt:new Date().toISOString(),
     profile:profile,
     customItems:customItems
@@ -1014,7 +1030,8 @@ function seed(){
     "annualLast",
     "transponderLast",
     "staticLast",
-    "eltLast"
+    "eltLast",
+    "vorLast"
   ].forEach(k=>{
     if(!profile[k])profile[k]=DEFAULT_EXPIRED_DATE;
   });

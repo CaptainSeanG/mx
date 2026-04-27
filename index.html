@@ -211,6 +211,7 @@ button.delete{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
   gap:10px;
+  align-items:start;
 }
 
 .card{
@@ -281,7 +282,7 @@ body.dashboard-active #dashboardTab{
 }
 
 #dashboardCards{
-  flex:1;
+  flex:0;
 }
 
 .dashboard-disclaimer{
@@ -292,10 +293,23 @@ body.dashboard-active #dashboardTab{
 }
 
 .page-wrap{
+  padding:0;
+  background:transparent;
+  box-shadow:none;
+  border-radius:0;
+}
+
+.setup-page{
   background:rgba(255,255,255,.96);
   border-radius:0 16px 16px 16px;
   padding:14px;
   box-shadow:0 6px 18px rgba(0,0,0,.08);
+}
+
+.custom-page{
+  background:transparent;
+  box-shadow:none;
+  padding:0;
 }
 
 .highlight-field{
@@ -353,7 +367,7 @@ body.dashboard-active #dashboardTab{
     </div>
   </section>
 
-  <section id="setupTab" class="hidden page-wrap">
+  <section id="setupTab" class="hidden setup-page">
     <div class="setup-grid">
       <div class="panel">
         <h2 class="section-title">Pilot Profile</h2>
@@ -433,7 +447,7 @@ body.dashboard-active #dashboardTab{
     <div class="cards" id="aircraftCards"></div>
   </section>
 
-  <section id="customTab" class="hidden page-wrap">
+  <section id="customTab" class="hidden custom-page">
     <div class="grid">
       <div class="panel">
         <h2 class="section-title">Add Custom Item</h2>
@@ -459,8 +473,7 @@ body.dashboard-active #dashboardTab{
         <button onclick="addCustomItem()">Add Custom Item</button>
       </div>
 
-      <div class="panel">
-        <h2 class="section-title">Custom Items</h2>
+      <div>
         <div class="cards" id="customCards"></div>
       </div>
     </div>
@@ -469,7 +482,7 @@ body.dashboard-active #dashboardTab{
 </div>
 
 <script>
-const STORAGE_KEY="aircraftPilotTrackerTabsV3";
+const STORAGE_KEY="aircraftPilotTrackerTabsV4";
 
 let profile={
   pilotCertificate:"Private",

@@ -127,9 +127,7 @@ body:not(.dashboard-active) .summary{
 .tab:nth-child(4){background:var(--orange);}
 .tab:nth-child(5){background:var(--purple);}
 
-.tab:hover{
-  opacity:1;
-}
+.tab:hover{opacity:1}
 
 .tab.active{
   opacity:1;
@@ -187,9 +185,7 @@ input[type=checkbox]{
   margin-right:8px;
 }
 
-input[type=file]{
-  background:#fff;
-}
+input[type=file]{background:#fff}
 
 .checkbox-row{
   display:flex;
@@ -207,17 +203,9 @@ button{
   font-weight:bold;
 }
 
-button.delete{
-  background:#991b1b;
-}
-
-button.backup{
-  background:#2563eb;
-}
-
-button.restore{
-  background:#16a34a;
-}
+button.delete{background:#991b1b}
+button.backup{background:#2563eb}
+button.restore{background:#16a34a}
 
 .cards{
   display:grid;
@@ -276,26 +264,18 @@ button.restore{
   font-size:12px !important;
 }
 
-.extra-detail{
-  opacity:1;
-}
+.extra-detail{opacity:1}
 
-.hidden{
-  display:none !important;
-}
+.hidden{display:none !important}
 
 #dashboardTab{
   min-height:calc(100vh - 175px);
   flex-direction:column;
 }
 
-body.dashboard-active #dashboardTab{
-  display:flex;
-}
+body.dashboard-active #dashboardTab{display:flex}
 
-#dashboardCards{
-  flex:0;
-}
+#dashboardCards{flex:0}
 
 .dashboard-disclaimer{
   margin-top:8px;
@@ -337,6 +317,12 @@ body.dashboard-active #dashboardTab{
   line-height:1.35;
 }
 
+.helper{
+  font-size:12px;
+  color:var(--muted);
+  margin-top:4px;
+}
+
 .highlight-field{
   outline:3px solid #f97316;
   animation:flash 1.5s ease;
@@ -348,10 +334,7 @@ body.dashboard-active #dashboardTab{
 }
 
 @media(max-width:900px){
-  .setup-grid,.grid{
-    grid-template-columns:1fr;
-  }
-
+  .setup-grid,.grid{grid-template-columns:1fr}
   .tab{
     font-size:11px;
     padding:6px 8px 7px;
@@ -407,13 +390,24 @@ body.dashboard-active #dashboardTab{
           <option>ATP</option>
         </select>
 
+        <label>Pilot Birth Date</label>
+        <input id="birthDate" type="date">
+        <div class="helper">Used to calculate medical duration based on age at medical exam date.</div>
+
         <div class="checkbox-row"><input type="checkbox" id="instrumentRated">Instrument Rated</div>
         <div class="checkbox-row"><input type="checkbox" id="fliesIFR">Flies IFR</div>
         <div class="checkbox-row"><input type="checkbox" id="carriesPassengers" checked>Carries Passengers</div>
         <div class="checkbox-row"><input type="checkbox" id="carriesNightPassengers" checked>Carries Night Passengers</div>
         <div class="checkbox-row"><input type="checkbox" id="usesBasicMed">Uses BasicMed</div>
 
-        <label>Medical / BasicMed Last Completed</label>
+        <label>Medical Class Issued</label>
+        <select id="medicalClass">
+          <option value="Third">Third Class</option>
+          <option value="Second">Second Class</option>
+          <option value="First">First Class</option>
+        </select>
+
+        <label>Medical / BasicMed Exam Date</label>
         <input id="medicalLast" type="date">
 
         <label>Flight Review Last Completed</label>
@@ -518,16 +512,18 @@ body.dashboard-active #dashboardTab{
 </div>
 
 <script>
-const STORAGE_KEY="aircraftPilotTrackerTabsV5";
+const STORAGE_KEY="aircraftPilotTrackerTabsV6";
 const DEFAULT_EXPIRED_DATE="2020-01-01";
 
 let profile={
   pilotCertificate:"Private",
+  birthDate:"",
   instrumentRated:false,
   fliesIFR:false,
   carriesPassengers:true,
   carriesNightPassengers:true,
   usesBasicMed:false,
+  medicalClass:"Third",
   medicalLast:"",
   flightReviewLast:"",
   dayCurrencyLast:"",
@@ -558,11 +554,52 @@ function addDays(d,n){
   return x.toISOString().slice(0,10);
 }
 
-function addMonths(d,n){
+function addMonthsEndOfMonth(d,n){
   if(!d)return "";
   let x=new Date(d+"T00:00:00");
   x.setMonth(x.getMonth()+n+1,0);
   return x.toISOString().slice(0,10);
+}
+
+function ageOnDate(birthDate,targetDate){
+  if(!birthDate || !targetDate)return null;
+
+  const b=new Date(birthDate+"T00:00:00");
+  const t=new Date(targetDate+"T00:00:00");
+
+  let age=t.getFullYear()-b.getFullYear();
+  const m=t.getMonth()-b.getMonth();
+
+  if(m<0 || (m===0 && t.getDate()<b.getDate())){
+    age--;
+  }
+
+  return age;
+}
+
+function medicalPrivilegeMonths(medicalClass,privilege,birthDate,examDate){
+  const age=ageOnDate(birthDate,examDate);
+
+  if(age===null)return null;
+
+  const over40=age>=40;
+
+  if(medicalClass==="First"){
+    if(privilege==="First")return over40 ? 6 : 12;
+    if(privilege==="Second")return 12;
+    if(privilege==="Third")return over40 ? 24 : 60;
+  }
+
+  if(medicalClass==="Second"){
+    if(privilege==="Second")return 12;
+    if(privilege==="Third")return over40 ? 24 : 60;
+  }
+
+  if(medicalClass==="Third"){
+    if(privilege==="Third")return over40 ? 24 : 60;
+  }
+
+  return null;
 }
 
 function daysUntil(d){
@@ -622,6 +659,57 @@ function populate(){
   Object.keys(profile).forEach(k=>setVal(k,profile[k]));
 }
 
+function medicalRules(){
+  let rules=[];
+
+  if(profile.usesBasicMed){
+    rules.push({
+      id:"medicalLast",
+      type:"Pilot",
+      category:"Medical",
+      title:"BasicMed Exam Checklist",
+      dueDate:addMonthsEndOfMonth(profile.medicalLast,48),
+      notes:"48 calendar months. Also track online course separately if desired."
+    });
+
+    return rules;
+  }
+
+  const cls=profile.medicalClass;
+  const exam=profile.medicalLast;
+  const birth=profile.birthDate;
+  const age=ageOnDate(birth,exam);
+
+  let privileges=[];
+
+  if(cls==="First")privileges=["First","Second","Third"];
+  if(cls==="Second")privileges=["Second","Third"];
+  if(cls==="Third")privileges=["Third"];
+
+  privileges.forEach(priv=>{
+    const months=medicalPrivilegeMonths(cls,priv,birth,exam);
+    const dueDate=months ? addMonthsEndOfMonth(exam,months) : "";
+
+    let label="";
+    if(priv==="First")label="First-Class Privileges";
+    if(priv==="Second")label="Second-Class Privileges";
+    if(priv==="Third")label="Third-Class Privileges";
+
+    rules.push({
+      id:!birth ? "birthDate" : "medicalLast",
+      type:"Pilot",
+      category:"Medical",
+      title:label,
+      dueDate:dueDate,
+      notes:months
+        ? `${months} calendar months. Age at exam: ${age}. Medical issued as ${cls} Class.`
+        : "Enter birth date and medical exam date to calculate."
+    });
+  });
+
+  return rules;
+}
+
 function pilotRules(){
   let a=[];
 
@@ -630,18 +718,11 @@ function pilotRules(){
     type:"Pilot",
     category:"Proficiency",
     title:"Flight Review",
-    dueDate:addMonths(profile.flightReviewLast,24),
-    notes:"24 months"
+    dueDate:addMonthsEndOfMonth(profile.flightReviewLast,24),
+    notes:"24 calendar months"
   });
 
-  a.push({
-    id:"medicalLast",
-    type:"Pilot",
-    category:"Medical",
-    title:profile.usesBasicMed?"BasicMed":"FAA Medical",
-    dueDate:addMonths(profile.medicalLast,24),
-    notes:"Verify privileges"
-  });
+  a.push(...medicalRules());
 
   if(profile.carriesPassengers){
     a.push({
@@ -650,7 +731,7 @@ function pilotRules(){
       category:"Currency",
       title:"Day Passenger Currency",
       dueDate:addDays(profile.dayCurrencyLast,90),
-      notes:"90 days"
+      notes:"3 takeoffs and landings within preceding 90 days."
     });
   }
 
@@ -661,7 +742,7 @@ function pilotRules(){
       category:"Currency",
       title:"Night Passenger Currency",
       dueDate:addDays(profile.nightCurrencyLast,90),
-      notes:"90 days"
+      notes:"3 full-stop takeoffs and landings within preceding 90 days."
     });
   }
 
@@ -671,8 +752,8 @@ function pilotRules(){
       type:"Pilot",
       category:"IFR",
       title:"Instrument Currency",
-      dueDate:addMonths(profile.instrumentCurrencyLast,6),
-      notes:"6 months"
+      dueDate:addMonthsEndOfMonth(profile.instrumentCurrencyLast,6),
+      notes:"6 calendar months: approaches, holding, intercepting/tracking."
     });
   }
 
@@ -687,8 +768,8 @@ function aircraftRules(){
     type:"Aircraft",
     category:"Inspection",
     title:"Annual Inspection",
-    dueDate:addMonths(profile.annualLast,12),
-    notes:"12 months"
+    dueDate:addMonthsEndOfMonth(profile.annualLast,12),
+    notes:"12 calendar months"
   });
 
   if(profile.hasTransponder){
@@ -697,8 +778,8 @@ function aircraftRules(){
       type:"Aircraft",
       category:"Avionics",
       title:"Transponder Check",
-      dueDate:addMonths(profile.transponderLast,24),
-      notes:"24 months"
+      dueDate:addMonthsEndOfMonth(profile.transponderLast,24),
+      notes:"24 calendar months"
     });
   }
 
@@ -708,8 +789,8 @@ function aircraftRules(){
       type:"Aircraft",
       category:"IFR",
       title:"Altimeter / Static",
-      dueDate:addMonths(profile.staticLast,24),
-      notes:"24 months"
+      dueDate:addMonthsEndOfMonth(profile.staticLast,24),
+      notes:"24 calendar months"
     });
   }
 
@@ -719,8 +800,8 @@ function aircraftRules(){
       type:"Aircraft",
       category:"Emergency",
       title:"ELT Inspection",
-      dueDate:addMonths(profile.eltLast,12),
-      notes:"12 months"
+      dueDate:addMonthsEndOfMonth(profile.eltLast,12),
+      notes:"12 calendar months"
     });
 
     a.push({
@@ -729,7 +810,7 @@ function aircraftRules(){
       category:"Emergency",
       title:"ELT Battery",
       dueDate:profile.eltBatteryDue,
-      notes:"Battery due"
+      notes:"Battery due date"
     });
   }
 
@@ -861,7 +942,7 @@ function backupData(){
 
   const data={
     app:"Aircraft & Pilot Compliance Tracker",
-    version:"2.0",
+    version:"2.1",
     exportedAt:new Date().toISOString(),
     profile:profile,
     customItems:customItems

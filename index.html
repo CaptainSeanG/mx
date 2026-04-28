@@ -7,100 +7,174 @@
 
 <style>
 :root{
-  --navy:#0f172a;
+  --navy:#07111f;
+  --panel:#0f1b2e;
+  --glass:rgba(255,255,255,.10);
+  --glass2:rgba(255,255,255,.16);
+  --white:#f8fafc;
+  --muted:#9fb0c8;
   --blue:#2563eb;
   --green:#16a34a;
   --orange:#f97316;
   --red:#dc2626;
   --purple:#7c3aed;
   --slate:#475569;
-  --bg:#eef2f7;
-  --text:#172033;
-  --muted:#64748b;
-  --border:#dbe3ef;
+  --border:rgba(255,255,255,.16);
 }
 
 *{box-sizing:border-box}
-html,body{margin:0;padding:0}
+
+html,body{
+  margin:0;
+  padding:0;
+}
 
 body{
   font-family:Arial,Helvetica,sans-serif;
-  color:var(--text);
+  color:var(--white);
   min-height:100vh;
   background:
-    radial-gradient(circle at 20% 20%, rgba(14,165,233,.16), transparent 24%),
-    radial-gradient(circle at 82% 12%, rgba(249,115,22,.12), transparent 20%),
-    linear-gradient(120deg, rgba(15,23,42,.88), rgba(15,23,42,.12)),
-    var(--bg);
+    radial-gradient(circle at 18% 18%, rgba(37,99,235,.30), transparent 25%),
+    radial-gradient(circle at 84% 16%, rgba(249,115,22,.22), transparent 22%),
+    radial-gradient(circle at 50% 95%, rgba(22,163,74,.12), transparent 28%),
+    linear-gradient(145deg,#07111f,#111827 48%,#020617);
   overflow-x:hidden;
   position:relative;
+}
+
+/* Aviation line-art background */
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  opacity:.14;
+  background:
+    linear-gradient(90deg, transparent 49%, rgba(255,255,255,.28) 50%, transparent 51%) 0 0/90px 90px,
+    linear-gradient(0deg, transparent 49%, rgba(255,255,255,.24) 50%, transparent 51%) 0 0/90px 90px,
+    radial-gradient(circle at 70% 55%, transparent 0 78px, rgba(255,255,255,.18) 79px 81px, transparent 82px),
+    radial-gradient(circle at 70% 55%, transparent 0 135px, rgba(255,255,255,.12) 136px 138px, transparent 139px);
 }
 
 body::after{
   content:"✈";
   position:fixed;
-  right:6vw;
-  bottom:5vh;
-  font-size:240px;
-  color:rgba(255,255,255,.10);
+  right:5vw;
+  bottom:3vh;
+  font-size:250px;
+  color:rgba(255,255,255,.08);
   transform:rotate(-18deg);
   pointer-events:none;
 }
 
+/* Header */
 header{
-  background:linear-gradient(135deg,#0f172a,#1e293b);
-  color:#fff;
-  padding:12px 18px 8px;
+  background:linear-gradient(135deg,rgba(2,6,23,.94),rgba(15,23,42,.86));
+  border-bottom:1px solid var(--border);
+  padding:16px 18px 10px;
+  backdrop-filter:blur(10px);
 }
 
 .header-inner{
-  max-width:1360px;
+  max-width:1380px;
   margin:auto;
 }
 
-h1{
-  margin:0;
-  font-size:26px;
+.top-row{
+  display:flex;
+  justify-content:space-between;
+  gap:16px;
+  align-items:flex-start;
+  flex-wrap:wrap;
 }
 
+.brand h1{
+  margin:0;
+  font-size:27px;
+  letter-spacing:.2px;
+}
+
+.profile-line{
+  margin-top:5px;
+  color:var(--muted);
+  font-size:14px;
+}
+
+.mini-panel{
+  font-family:monospace;
+  color:rgba(255,255,255,.52);
+  font-size:13px;
+  text-align:right;
+  line-height:1.35;
+}
+
+/* Gauges */
 .summary{
-  display:flex;
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(128px,1fr));
   gap:10px;
-  flex-wrap:wrap;
-  margin-top:10px;
+  margin-top:14px;
 }
 
 body:not(.dashboard-active) .summary{
   display:none !important;
 }
 
-.summary-box{
-  min-width:132px;
-  padding:9px 12px;
-  border-radius:12px;
+.gauge{
+  background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,.06));
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:12px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  box-shadow:0 10px 28px rgba(0,0,0,.20);
+}
+
+.gauge-ring{
+  width:45px;
+  height:45px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
   font-weight:bold;
-  text-align:center;
-  font-size:14px;
+  font-size:16px;
+  border:4px solid currentColor;
 }
 
-.red{background:var(--red);color:#fff}
-.orange{background:var(--orange);color:#fff}
-.green{background:var(--green);color:#fff}
-.blue{background:var(--blue);color:#fff}
-.gray{background:#475569;color:#fff}
+.gauge-label{
+  font-size:12px;
+  color:var(--muted);
+  text-transform:uppercase;
+  letter-spacing:.08em;
+}
 
+.gauge-value{
+  font-size:18px;
+  font-weight:bold;
+}
+
+.g-red{color:var(--red)}
+.g-orange{color:var(--orange)}
+.g-green{color:var(--green)}
+.g-blue{color:#60a5fa}
+
+/* App */
 .app{
-  max-width:1360px;
+  max-width:1380px;
   margin:0 auto;
-  padding:0 14px 14px;
+  padding:0 14px 16px;
+  position:relative;
+  z-index:1;
 }
 
+/* Folder tabs */
 .tabs{
   display:flex;
   gap:3px;
   align-items:flex-end;
-  padding-top:7px;
-  margin-bottom:8px;
+  padding-top:9px;
+  margin-bottom:10px;
   overflow:visible;
   flex-wrap:wrap;
 }
@@ -112,34 +186,42 @@ body:not(.dashboard-active) .summary{
   font-size:12px;
   font-weight:bold;
   cursor:pointer;
-  border-radius:8px 8px 0 0;
-  min-width:auto;
+  border-radius:9px 9px 0 0;
   width:auto;
   transform:translateY(3px);
   transition:.15s ease;
-  opacity:.84;
+  opacity:.82;
   white-space:nowrap;
 }
 
-.tab:nth-child(1){background:var(--blue);}
-.tab:nth-child(2){background:var(--slate);}
-.tab:nth-child(3){background:var(--green);}
-.tab:nth-child(4){background:var(--orange);}
-.tab:nth-child(5){background:var(--purple);}
+.tab:nth-child(1){background:var(--blue)}
+.tab:nth-child(2){background:var(--slate)}
+.tab:nth-child(3){background:var(--green)}
+.tab:nth-child(4){background:var(--orange)}
+.tab:nth-child(5){background:var(--purple)}
 
-.tab:hover{opacity:1}
+.tab:hover,.tab.active{opacity:1}
 
 .tab.active{
-  opacity:1;
   transform:translateY(0);
-  box-shadow:0 5px 12px rgba(0,0,0,.16);
+  box-shadow:0 7px 18px rgba(0,0,0,.24);
 }
 
-.panel,.card{
-  background:rgba(255,255,255,.96);
-  border-radius:16px;
+/* Layout */
+.panel{
+  background:rgba(255,255,255,.92);
+  color:#172033;
+  border-radius:18px;
   padding:14px;
-  box-shadow:0 4px 14px rgba(15,23,42,.10);
+  box-shadow:0 8px 24px rgba(0,0,0,.18);
+}
+
+.setup-page{
+  background:rgba(255,255,255,.92);
+  color:#172033;
+  border-radius:0 18px 18px 18px;
+  padding:14px;
+  box-shadow:0 8px 24px rgba(0,0,0,.18);
 }
 
 .setup-grid{
@@ -171,7 +253,7 @@ input,select,textarea,button{
   padding:10px;
   margin-top:5px;
   border-radius:10px;
-  border:1px solid var(--border);
+  border:1px solid #dbe3ef;
   font-size:14px;
 }
 
@@ -185,8 +267,6 @@ input[type=checkbox]{
   margin-right:8px;
 }
 
-input[type=file]{background:#fff}
-
 .checkbox-row{
   display:flex;
   align-items:center;
@@ -196,7 +276,7 @@ input[type=file]{background:#fff}
 }
 
 button{
-  background:var(--navy);
+  background:#0f172a;
   color:#fff;
   border:none;
   cursor:pointer;
@@ -207,25 +287,45 @@ button.delete{background:#991b1b}
 button.backup{background:#2563eb}
 button.restore{background:#16a34a}
 
+.helper{
+  font-size:12px;
+  color:#64748b;
+  margin-top:4px;
+}
+
+.data-tools{
+  margin-top:18px;
+  padding-top:14px;
+  border-top:1px solid #dbe3ef;
+}
+
+.data-tools p{
+  font-size:13px;
+  color:#64748b;
+}
+
+/* Cards */
 .cards{
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+  grid-template-columns:repeat(auto-fit,minmax(225px,1fr));
   gap:10px;
   align-items:start;
 }
 
 .card{
-  border-left:8px solid var(--green);
+  background:linear-gradient(180deg,rgba(255,255,255,.94),rgba(255,255,255,.86));
+  color:#172033;
+  border-radius:16px;
   padding:10px 12px;
+  border-left:8px solid var(--green);
   cursor:pointer;
-  max-height:none;
-  overflow:visible;
+  box-shadow:0 6px 18px rgba(0,0,0,.18);
   transition:transform .15s ease, box-shadow .15s ease;
 }
 
 .card:hover{
   transform:translateY(-2px);
-  box-shadow:0 8px 18px rgba(0,0,0,.14);
+  box-shadow:0 10px 26px rgba(0,0,0,.22);
 }
 
 .card.warning{
@@ -238,89 +338,186 @@ button.restore{background:#16a34a}
   border-left-color:var(--red);
 }
 
-.card h3{
-  margin:2px 0 4px;
-  font-size:17px;
+.card.missing{
+  border-left-color:#64748b;
 }
 
-.card p{
-  margin:3px 0;
-  font-size:13px;
-  line-height:1.2;
+.card-top{
+  display:flex;
+  justify-content:space-between;
+  gap:8px;
+  align-items:flex-start;
+}
+
+.icon{
+  font-size:22px;
+  line-height:1;
 }
 
 .badge{
   display:inline-block;
   padding:4px 8px;
   border-radius:999px;
-  font-size:11px;
+  font-size:10px;
   font-weight:bold;
   color:#fff;
   margin-bottom:4px;
 }
 
+.red{background:var(--red)}
+.orange{background:var(--orange)}
+.green{background:var(--green)}
+.gray{background:#475569}
+
+.card h3{
+  margin:4px 0 4px;
+  font-size:16px;
+  line-height:1.15;
+}
+
+.card p{
+  margin:3px 0;
+  font-size:12px;
+  line-height:1.2;
+}
+
+.days-hero{
+  font-size:22px;
+  font-weight:900;
+  letter-spacing:-.5px;
+  margin-top:3px;
+}
+
 .meta{
-  color:var(--muted);
+  color:#64748b;
   font-size:12px !important;
 }
 
-.extra-detail{opacity:1}
+.progress{
+  height:6px;
+  background:#e2e8f0;
+  border-radius:999px;
+  overflow:hidden;
+  margin-top:7px;
+}
+
+.progress-fill{
+  height:100%;
+  width:50%;
+  border-radius:999px;
+  background:var(--green);
+}
+
+.card.warning .progress-fill{background:var(--orange)}
+.card.overdue .progress-fill{background:var(--red)}
+.card.missing .progress-fill{background:#64748b}
+
+/* Timeline */
+.timeline{
+  margin-bottom:12px;
+  background:rgba(255,255,255,.10);
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:12px;
+  backdrop-filter:blur(8px);
+}
+
+.timeline-title{
+  font-weight:bold;
+  font-size:13px;
+  color:#dbeafe;
+  margin-bottom:8px;
+}
+
+.timeline-track{
+  display:flex;
+  gap:6px;
+  overflow-x:auto;
+  padding-bottom:2px;
+}
+
+.timeline-pill{
+  min-width:120px;
+  padding:8px 10px;
+  border-radius:999px;
+  color:white;
+  font-size:12px;
+  font-weight:bold;
+  white-space:nowrap;
+}
+
+.empty-state{
+  background:rgba(255,255,255,.12);
+  border:1px dashed rgba(255,255,255,.30);
+  color:#dbeafe;
+  border-radius:18px;
+  padding:22px;
+  text-align:center;
+}
 
 .hidden{display:none !important}
 
 #dashboardTab{
-  min-height:calc(100vh - 175px);
+  min-height:calc(100vh - 205px);
   flex-direction:column;
 }
 
-body.dashboard-active #dashboardTab{display:flex}
+body.dashboard-active #dashboardTab{
+  display:flex;
+}
 
-#dashboardCards{flex:0}
+#dashboardCards{
+  flex:0;
+}
 
 .dashboard-disclaimer{
-  margin-top:8px;
+  margin-top:9px;
   font-size:11px;
   color:#dbeafe;
   text-align:center;
 }
 
-.page-wrap{
+.page-wrap,.custom-page{
   padding:0;
   background:transparent;
   box-shadow:none;
   border-radius:0;
 }
 
-.setup-page{
-  background:rgba(255,255,255,.96);
-  border-radius:0 16px 16px 16px;
-  padding:14px;
-  box-shadow:0 6px 18px rgba(0,0,0,.08);
+/* Onboarding */
+.onboarding{
+  position:fixed;
+  inset:0;
+  background:rgba(2,6,23,.78);
+  display:grid;
+  place-items:center;
+  z-index:99;
+  padding:18px;
 }
 
-.custom-page{
-  background:transparent;
-  box-shadow:none;
-  padding:0;
+.onboarding-card{
+  max-width:560px;
+  background:linear-gradient(180deg,#ffffff,#f1f5f9);
+  color:#172033;
+  border-radius:26px;
+  padding:24px;
+  box-shadow:0 24px 70px rgba(0,0,0,.38);
 }
 
-.data-tools{
-  margin-top:18px;
-  padding-top:14px;
-  border-top:1px solid var(--border);
+.onboarding-card h2{
+  margin:0 0 8px;
+  font-size:28px;
 }
 
-.data-tools p{
-  margin:6px 0 10px;
-  font-size:13px;
-  color:var(--muted);
-  line-height:1.35;
+.onboarding-card p{
+  color:#475569;
+  line-height:1.45;
 }
 
-.helper{
-  font-size:12px;
-  color:var(--muted);
-  margin-top:4px;
+.onboarding-actions{
+  display:flex;
+  gap:10px;
+  margin-top:16px;
 }
 
 .highlight-field{
@@ -335,25 +532,55 @@ body.dashboard-active #dashboardTab{display:flex}
 
 @media(max-width:900px){
   .setup-grid,.grid{grid-template-columns:1fr}
-  .tab{
-    font-size:11px;
-    padding:6px 8px 7px;
-  }
+  .mini-panel{text-align:left}
+  .tab{font-size:11px;padding:6px 8px 7px}
 }
 </style>
 </head>
 
 <body>
 
+<div id="onboarding" class="onboarding hidden">
+  <div class="onboarding-card">
+    <h2>Welcome aboard.</h2>
+    <p>This tracker starts with expired default dates so owners and pilots can enter their real aircraft and currency data. Set up your pilot profile, aircraft profile, and medical details first.</p>
+    <div class="onboarding-actions">
+      <button onclick="dismissOnboardingAndSetup()">Start Setup</button>
+      <button class="backup" onclick="dismissOnboarding()">Skip for Now</button>
+    </div>
+  </div>
+</div>
+
 <header>
   <div class="header-inner">
-    <h1>Aircraft & Pilot Compliance Tracker</h1>
+    <div class="top-row">
+      <div class="brand">
+        <h1>Aircraft & Pilot Compliance Tracker</h1>
+        <div class="profile-line" id="profileLine">Aircraft not set · Pilot profile not set</div>
+      </div>
+      <div class="mini-panel" id="miniPanel">
+        COMPLIANCE MODE<br>
+        LOCAL STORAGE · OFFLINE READY
+      </div>
+    </div>
 
     <div class="summary">
-      <div class="summary-box red" id="overdueCount">0 Overdue</div>
-      <div class="summary-box orange" id="warningCount">0 Due Soon</div>
-      <div class="summary-box green" id="currentCount">0 Current</div>
-      <div class="summary-box blue" id="totalCount">0 Total</div>
+      <div class="gauge g-red">
+        <div class="gauge-ring" id="overdueGauge">0</div>
+        <div><div class="gauge-label">Overdue</div><div class="gauge-value" id="overdueCount">0 Items</div></div>
+      </div>
+      <div class="gauge g-orange">
+        <div class="gauge-ring" id="warningGauge">0</div>
+        <div><div class="gauge-label">Due Soon</div><div class="gauge-value" id="warningCount">0 Items</div></div>
+      </div>
+      <div class="gauge g-green">
+        <div class="gauge-ring" id="currentGauge">0</div>
+        <div><div class="gauge-label">Current</div><div class="gauge-value" id="currentCount">0 Items</div></div>
+      </div>
+      <div class="gauge g-blue">
+        <div class="gauge-ring" id="totalGauge">0</div>
+        <div><div class="gauge-label">Total</div><div class="gauge-value" id="totalCount">0 Items</div></div>
+      </div>
     </div>
   </div>
 </header>
@@ -369,6 +596,7 @@ body.dashboard-active #dashboardTab{display:flex}
   </div>
 
   <section id="dashboardTab">
+    <div class="timeline" id="timeline"></div>
     <div class="cards" id="dashboardCards"></div>
     <div class="dashboard-disclaimer">
       Planning aid only. Verify all requirements against FARs, aircraft records, ADs, POH/AFM, and qualified maintenance guidance.
@@ -427,9 +655,7 @@ body.dashboard-active #dashboardTab{display:flex}
         <div class="data-tools">
           <h2 class="section-title">Backup / Restore</h2>
           <p>Data is saved in this browser. Use backup/restore to move it to another computer or protect against browser data loss.</p>
-
           <button class="backup" onclick="backupData()">Backup My Data</button>
-
           <label>Restore Backup File</label>
           <input id="restoreFile" type="file" accept="application/json">
           <button class="restore" onclick="restoreData()">Restore My Data</button>
@@ -466,7 +692,7 @@ body.dashboard-active #dashboardTab{display:flex}
 
         <label>VOR Check Last Completed</label>
         <input id="vorLast" type="date">
-        <div class="helper">Shown when the pilot profile has “Flies IFR” selected.</div>
+        <div class="helper">Shown when “Flies IFR” is selected.</div>
 
         <button onclick="saveProfile()">Save Aircraft Profile</button>
       </div>
@@ -516,7 +742,7 @@ body.dashboard-active #dashboardTab{display:flex}
 </div>
 
 <script>
-const STORAGE_KEY="aircraftPilotTrackerTabsV7";
+const STORAGE_KEY="aircraftPilotTrackerProV1";
 const DEFAULT_EXPIRED_DATE="2020-01-01";
 
 let profile={
@@ -548,9 +774,7 @@ let profile={
 
 let customItems=[];
 
-function todayISO(){
-  return new Date().toISOString().slice(0,10);
-}
+function todayISO(){return new Date().toISOString().slice(0,10);}
 
 function addDays(d,n){
   if(!d)return "";
@@ -566,27 +790,25 @@ function addMonthsEndOfMonth(d,n){
   return x.toISOString().slice(0,10);
 }
 
+function daysUntil(d){
+  if(!d)return 99999;
+  let t=new Date(); t.setHours(0,0,0,0);
+  return Math.ceil((new Date(d+"T00:00:00")-t)/86400000);
+}
+
 function ageOnDate(birthDate,targetDate){
   if(!birthDate || !targetDate)return null;
-
   const b=new Date(birthDate+"T00:00:00");
   const t=new Date(targetDate+"T00:00:00");
-
   let age=t.getFullYear()-b.getFullYear();
   const m=t.getMonth()-b.getMonth();
-
-  if(m<0 || (m===0 && t.getDate()<b.getDate())){
-    age--;
-  }
-
+  if(m<0 || (m===0 && t.getDate()<b.getDate())) age--;
   return age;
 }
 
 function medicalPrivilegeMonths(medicalClass,privilege,birthDate,examDate){
   const age=ageOnDate(birthDate,examDate);
-
   if(age===null)return null;
-
   const over40=age>=40;
 
   if(medicalClass==="First"){
@@ -594,24 +816,14 @@ function medicalPrivilegeMonths(medicalClass,privilege,birthDate,examDate){
     if(privilege==="Second")return 12;
     if(privilege==="Third")return over40 ? 24 : 60;
   }
-
   if(medicalClass==="Second"){
     if(privilege==="Second")return 12;
     if(privilege==="Third")return over40 ? 24 : 60;
   }
-
   if(medicalClass==="Third"){
     if(privilege==="Third")return over40 ? 24 : 60;
   }
-
   return null;
-}
-
-function daysUntil(d){
-  if(!d)return 99999;
-  let t=new Date();
-  t.setHours(0,0,0,0);
-  return Math.ceil((new Date(d+"T00:00:00")-t)/86400000);
 }
 
 function statusFor(d){
@@ -630,6 +842,34 @@ function statusText(d){
   return `Due in ${n} days`;
 }
 
+function heroText(d){
+  if(!d)return "DATE NEEDED";
+  let n=daysUntil(d);
+  if(n<0)return `${Math.abs(n)} DAYS LATE`;
+  if(n===0)return "DUE TODAY";
+  return `${n} DAYS LEFT`;
+}
+
+function progressPercent(d){
+  if(!d)return 0;
+  let n=daysUntil(d);
+  if(n<0)return 100;
+  if(n>365)return 10;
+  return Math.max(8,Math.min(100,100-(n/365*100)));
+}
+
+function iconFor(item){
+  const t=(item.title+" "+item.category).toLowerCase();
+  if(t.includes("medical")||t.includes("basicmed"))return "✚";
+  if(t.includes("night"))return "☾";
+  if(t.includes("instrument")||t.includes("ifr")||t.includes("vor")||t.includes("static"))return "☁";
+  if(t.includes("transponder"))return "◉";
+  if(t.includes("elt"))return "⚡";
+  if(t.includes("annual")||t.includes("inspection"))return "🔧";
+  if(t.includes("flight review"))return "★";
+  return "✈";
+}
+
 function esc(s){
   return String(s||"")
     .replaceAll("&","&amp;")
@@ -638,13 +878,15 @@ function esc(s){
 }
 
 function save(){
-  localStorage.setItem(STORAGE_KEY,JSON.stringify({profile,customItems}));
+  localStorage.setItem(STORAGE_KEY,JSON.stringify({profile,customItems,onboarded:true}));
 }
 
 function load(){
-  let x=JSON.parse(localStorage.getItem(STORAGE_KEY)||"{}");
+  let raw=localStorage.getItem(STORAGE_KEY);
+  let x=JSON.parse(raw||"{}");
   if(x.profile)profile={...profile,...x.profile};
   if(x.customItems)customItems=x.customItems;
+  if(!raw) document.getElementById("onboarding").classList.remove("hidden");
 }
 
 function setVal(id,v){
@@ -666,17 +908,12 @@ function populate(){
 
 function medicalRules(){
   let rules=[];
-
   if(profile.usesBasicMed){
     rules.push({
-      id:"medicalLast",
-      type:"Pilot",
-      category:"Medical",
-      title:"BasicMed Exam Checklist",
+      id:"medicalLast",type:"Pilot",category:"Medical",title:"BasicMed Exam Checklist",
       dueDate:addMonthsEndOfMonth(profile.medicalLast,48),
-      notes:"48 calendar months. Also track online course separately if desired."
+      notes:"48 calendar months. Track online course separately if desired."
     });
-
     return rules;
   }
 
@@ -684,150 +921,67 @@ function medicalRules(){
   const exam=profile.medicalLast;
   const birth=profile.birthDate;
   const age=ageOnDate(birth,exam);
-
   let privileges=[];
-
   if(cls==="First")privileges=["First","Second","Third"];
   if(cls==="Second")privileges=["Second","Third"];
   if(cls==="Third")privileges=["Third"];
 
   privileges.forEach(priv=>{
     const months=medicalPrivilegeMonths(cls,priv,birth,exam);
-    const dueDate=months ? addMonthsEndOfMonth(exam,months) : "";
-
-    let label="";
-    if(priv==="First")label="First-Class Privileges";
-    if(priv==="Second")label="Second-Class Privileges";
-    if(priv==="Third")label="Third-Class Privileges";
-
     rules.push({
       id:!birth ? "birthDate" : "medicalLast",
       type:"Pilot",
       category:"Medical",
-      title:label,
-      dueDate:dueDate,
-      notes:months
-        ? `${months} calendar months. Age at exam: ${age}. Medical issued as ${cls} Class.`
-        : "Enter birth date and medical exam date to calculate."
+      title:`${priv}-Class Privileges`,
+      dueDate:months ? addMonthsEndOfMonth(exam,months) : "",
+      notes:months ? `${months} calendar months. Age at exam: ${age}. Issued as ${cls} Class.` : "Enter birth date and exam date."
     });
   });
-
   return rules;
 }
 
 function pilotRules(){
-  let a=[];
-
-  a.push({
-    id:"flightReviewLast",
-    type:"Pilot",
-    category:"Proficiency",
-    title:"Flight Review",
-    dueDate:addMonthsEndOfMonth(profile.flightReviewLast,24),
-    notes:"24 calendar months"
-  });
+  let a=[
+    {id:"flightReviewLast",type:"Pilot",category:"Proficiency",title:"Flight Review",dueDate:addMonthsEndOfMonth(profile.flightReviewLast,24),notes:"24 calendar months"}
+  ];
 
   a.push(...medicalRules());
 
   if(profile.carriesPassengers){
-    a.push({
-      id:"dayCurrencyLast",
-      type:"Pilot",
-      category:"Currency",
-      title:"Day Passenger Currency",
-      dueDate:addDays(profile.dayCurrencyLast,90),
-      notes:"3 takeoffs and landings within preceding 90 days."
-    });
+    a.push({id:"dayCurrencyLast",type:"Pilot",category:"Currency",title:"Day Passenger Currency",dueDate:addDays(profile.dayCurrencyLast,90),notes:"3 takeoffs and landings within preceding 90 days."});
   }
 
   if(profile.carriesNightPassengers){
-    a.push({
-      id:"nightCurrencyLast",
-      type:"Pilot",
-      category:"Currency",
-      title:"Night Passenger Currency",
-      dueDate:addDays(profile.nightCurrencyLast,90),
-      notes:"3 full-stop takeoffs and landings within preceding 90 days."
-    });
+    a.push({id:"nightCurrencyLast",type:"Pilot",category:"Currency",title:"Night Passenger Currency",dueDate:addDays(profile.nightCurrencyLast,90),notes:"3 full-stop takeoffs and landings within preceding 90 days."});
   }
 
   if(profile.instrumentRated&&profile.fliesIFR){
-    a.push({
-      id:"instrumentCurrencyLast",
-      type:"Pilot",
-      category:"IFR",
-      title:"Instrument Currency",
-      dueDate:addMonthsEndOfMonth(profile.instrumentCurrencyLast,6),
-      notes:"6 calendar months: approaches, holding, intercepting/tracking."
-    });
+    a.push({id:"instrumentCurrencyLast",type:"Pilot",category:"IFR",title:"Instrument Currency",dueDate:addMonthsEndOfMonth(profile.instrumentCurrencyLast,6),notes:"6 calendar months: approaches, holding, intercepting/tracking."});
   }
 
   return a;
 }
 
 function aircraftRules(){
-  let a=[];
-
-  a.push({
-    id:"annualLast",
-    type:"Aircraft",
-    category:"Inspection",
-    title:"Annual Inspection",
-    dueDate:addMonthsEndOfMonth(profile.annualLast,12),
-    notes:"12 calendar months"
-  });
+  let a=[
+    {id:"annualLast",type:"Aircraft",category:"Inspection",title:"Annual Inspection",dueDate:addMonthsEndOfMonth(profile.annualLast,12),notes:"12 calendar months"}
+  ];
 
   if(profile.hasTransponder){
-    a.push({
-      id:"transponderLast",
-      type:"Aircraft",
-      category:"Avionics",
-      title:"Transponder Check",
-      dueDate:addMonthsEndOfMonth(profile.transponderLast,24),
-      notes:"24 calendar months"
-    });
+    a.push({id:"transponderLast",type:"Aircraft",category:"Avionics",title:"Transponder Check",dueDate:addMonthsEndOfMonth(profile.transponderLast,24),notes:"24 calendar months"});
   }
 
   if(profile.ifrAircraft){
-    a.push({
-      id:"staticLast",
-      type:"Aircraft",
-      category:"IFR",
-      title:"Altimeter / Static",
-      dueDate:addMonthsEndOfMonth(profile.staticLast,24),
-      notes:"24 calendar months"
-    });
+    a.push({id:"staticLast",type:"Aircraft",category:"IFR",title:"Altimeter / Static",dueDate:addMonthsEndOfMonth(profile.staticLast,24),notes:"24 calendar months"});
   }
 
   if(profile.hasELT){
-    a.push({
-      id:"eltLast",
-      type:"Aircraft",
-      category:"Emergency",
-      title:"ELT Inspection",
-      dueDate:addMonthsEndOfMonth(profile.eltLast,12),
-      notes:"12 calendar months"
-    });
-
-    a.push({
-      id:"eltBatteryDue",
-      type:"Aircraft",
-      category:"Emergency",
-      title:"ELT Battery",
-      dueDate:profile.eltBatteryDue,
-      notes:"Battery due date"
-    });
+    a.push({id:"eltLast",type:"Aircraft",category:"Emergency",title:"ELT Inspection",dueDate:addMonthsEndOfMonth(profile.eltLast,12),notes:"12 calendar months"});
+    a.push({id:"eltBatteryDue",type:"Aircraft",category:"Emergency",title:"ELT Battery",dueDate:profile.eltBatteryDue,notes:"Battery due date"});
   }
 
   if(profile.fliesIFR){
-    a.push({
-      id:"vorLast",
-      type:"Aircraft",
-      category:"IFR",
-      title:"VOR Check",
-      dueDate:addDays(profile.vorLast,30),
-      notes:"30 days when using VOR equipment for IFR operations."
-    });
+    a.push({id:"vorLast",type:"Aircraft",category:"IFR",title:"VOR Check",dueDate:addDays(profile.vorLast,30),notes:"30 days when using VOR equipment for IFR operations."});
   }
 
   return a;
@@ -840,34 +994,61 @@ function allItems(){
 function renderCard(i,del=false){
   let s=statusFor(i.dueDate);
   let badge=s==="overdue"?"red":s==="warning"?"orange":s==="missing"?"gray":"green";
-  let cls=s==="overdue"?"card overdue":s==="warning"?"card warning":"card";
+  let cls=s==="overdue"?"card overdue":s==="warning"?"card warning":s==="missing"?"card missing":"card";
   let click=del?"":`onclick="goToSetting('${i.id||""}')"`; 
+  let pct=progressPercent(i.dueDate);
 
   return `
   <div class="${cls}" ${click}>
-    <span class="badge ${badge}">
-      ${s==="overdue"?"PAST DUE":s==="warning"?"DUE SOON":s==="missing"?"NEEDS DATE":"CURRENT"}
-    </span>
+    <div class="card-top">
+      <span class="badge ${badge}">${s==="overdue"?"PAST DUE":s==="warning"?"DUE SOON":s==="missing"?"NEEDS DATE":"CURRENT"}</span>
+      <div class="icon">${iconFor(i)}</div>
+    </div>
+    <div class="days-hero">${esc(heroText(i.dueDate))}</div>
     <h3>${esc(i.title)}</h3>
     <p><strong>${esc(i.type)}</strong> · ${esc(i.category)}</p>
     <p><strong>Due:</strong> ${esc(i.dueDate||"Date needed")}</p>
-    <p><strong>Status:</strong> ${esc(statusText(i.dueDate))}</p>
-    <div class="extra-detail">
-      <p class="meta">${esc(i.notes||"")}</p>
-    </div>
+    <div class="progress"><div class="progress-fill" style="width:${pct}%"></div></div>
+    <p class="meta">${esc(i.notes||"")}</p>
     ${del?`<button class="delete" onclick="deleteCustomItem(${i.id})">Delete</button>`:""}
   </div>`;
 }
 
 function renderList(id,list,del=false){
-  document.getElementById(id).innerHTML=list
+  const el=document.getElementById(id);
+  if(!list.length){
+    el.innerHTML=`<div class="empty-state">No items to show. Your setup selections are hiding this category.</div>`;
+    return;
+  }
+  el.innerHTML=list
     .sort((a,b)=>daysUntil(a.dueDate)-daysUntil(b.dueDate))
     .map(x=>renderCard(x,del)).join("");
 }
 
+function renderTimeline(){
+  const upcoming=allItems()
+    .filter(i=>i.dueDate)
+    .sort((a,b)=>daysUntil(a.dueDate)-daysUntil(b.dueDate))
+    .slice(0,8);
+
+  if(!upcoming.length){
+    timeline.innerHTML=`<div class="timeline-title">Next Up</div><div class="empty-state">No dated items yet.</div>`;
+    return;
+  }
+
+  timeline.innerHTML=`
+    <div class="timeline-title">Next Up / Compliance Timeline</div>
+    <div class="timeline-track">
+      ${upcoming.map(i=>{
+        const s=statusFor(i.dueDate);
+        const color=s==="overdue"?"red":s==="warning"?"orange":"green";
+        return `<div class="timeline-pill ${color}">${esc(i.title)} · ${esc(statusText(i.dueDate))}</div>`;
+      }).join("")}
+    </div>`;
+}
+
 function renderCounts(){
   let o=0,w=0,c=0;
-
   allItems().forEach(i=>{
     let s=statusFor(i.dueDate);
     if(s==="overdue")o++;
@@ -875,10 +1056,22 @@ function renderCounts(){
     if(s==="current")c++;
   });
 
-  overdueCount.textContent=`${o} Overdue`;
-  warningCount.textContent=`${w} Due Soon`;
-  currentCount.textContent=`${c} Current`;
-  totalCount.textContent=`${allItems().length} Total`;
+  overdueGauge.textContent=o;
+  warningGauge.textContent=w;
+  currentGauge.textContent=c;
+  totalGauge.textContent=allItems().length;
+
+  overdueCount.textContent=`${o} Items`;
+  warningCount.textContent=`${w} Items`;
+  currentCount.textContent=`${c} Items`;
+  totalCount.textContent=`${allItems().length} Items`;
+}
+
+function renderHeaderProfile(){
+  const aircraft=[profile.nNumber,profile.aircraftType].filter(Boolean).join(" · ") || "Aircraft not set";
+  const pilot=[profile.pilotCertificate,profile.instrumentRated?"Instrument":"VFR"].filter(Boolean).join(" · ");
+  profileLine.textContent=`${aircraft} · ${pilot}`;
+  miniPanel.innerHTML=`${profile.fliesIFR?"IFR MODE":"VFR MODE"}<br>${profile.usesBasicMed?"BASICMED":"FAA MEDICAL"} · LOCAL STORAGE`;
 }
 
 function renderAll(){
@@ -886,23 +1079,22 @@ function renderAll(){
   renderList("pilotCards",pilotRules());
   renderList("aircraftCards",aircraftRules());
   renderList("customCards",customItems,true);
+  renderTimeline();
   renderCounts();
+  renderHeaderProfile();
 }
 
 function showTab(name){
   ["dashboard","setup","pilot","aircraft","custom"].forEach(n=>{
     document.getElementById(n+"Tab").classList.toggle("hidden",n!==name);
   });
-
   document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
   document.querySelectorAll(".tab")[{dashboard:0,setup:1,pilot:2,aircraft:3,custom:4}[name]].classList.add("active");
-
   document.body.classList.toggle("dashboard-active",name==="dashboard");
 }
 
 function goToSetting(id){
   showTab("setup");
-
   setTimeout(()=>{
     let e=document.getElementById(id);
     if(e){
@@ -923,7 +1115,6 @@ function saveProfile(){
 function addCustomItem(){
   let title=getVal("customTitle");
   let due=getVal("customDue");
-
   if(!title || !due){
     alert("Please enter an item name and due date.");
     return;
@@ -955,24 +1146,13 @@ function deleteCustomItem(id){
 
 function backupData(){
   save();
-
-  const data={
-    app:"Aircraft & Pilot Compliance Tracker",
-    version:"2.2",
-    exportedAt:new Date().toISOString(),
-    profile:profile,
-    customItems:customItems
-  };
-
+  const data={app:"Aircraft & Pilot Compliance Tracker",version:"3.0",exportedAt:new Date().toISOString(),profile,customItems};
   const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
   const url=URL.createObjectURL(blob);
   const a=document.createElement("a");
-
   const aircraft=profile.nNumber ? profile.nNumber.replace(/[^a-z0-9]/gi,"") : "aircraft";
-  const date=todayISO();
-
   a.href=url;
-  a.download=`pilot-aircraft-compliance-backup-${aircraft}-${date}.json`;
+  a.download=`pilot-aircraft-compliance-backup-${aircraft}-${todayISO()}.json`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
@@ -982,61 +1162,50 @@ function backupData(){
 function restoreData(){
   const input=document.getElementById("restoreFile");
   const file=input.files[0];
-
   if(!file){
     alert("Please choose a backup JSON file first.");
     return;
   }
 
   const reader=new FileReader();
-
   reader.onload=function(e){
     try{
       const data=JSON.parse(e.target.result);
-
       if(!data.profile){
         alert("This does not look like a valid backup file.");
         return;
       }
-
-      if(!confirm("Restore this backup? This will replace the current saved data in this browser.")){
-        return;
-      }
+      if(!confirm("Restore this backup? This will replace current saved data.")) return;
 
       profile={...profile,...data.profile};
-      customItems=Array.isArray(data.customItems) ? data.customItems : [];
-
-      save();
-      populate();
-      renderAll();
-      showTab("dashboard");
-
+      customItems=Array.isArray(data.customItems)?data.customItems:[];
+      save(); populate(); renderAll(); showTab("dashboard");
       alert("Backup restored successfully.");
     }catch(err){
       alert("Could not read this backup file.");
     }
   };
-
   reader.readAsText(file);
 }
 
 function seed(){
   [
-    "flightReviewLast",
-    "medicalLast",
-    "dayCurrencyLast",
-    "nightCurrencyLast",
-    "instrumentCurrencyLast",
-    "annualLast",
-    "transponderLast",
-    "staticLast",
-    "eltLast",
-    "vorLast"
+    "flightReviewLast","medicalLast","dayCurrencyLast","nightCurrencyLast",
+    "instrumentCurrencyLast","annualLast","transponderLast","staticLast","eltLast","vorLast"
   ].forEach(k=>{
     if(!profile[k])profile[k]=DEFAULT_EXPIRED_DATE;
   });
-
   if(!profile.eltBatteryDue)profile.eltBatteryDue=DEFAULT_EXPIRED_DATE;
+}
+
+function dismissOnboarding(){
+  document.getElementById("onboarding").classList.add("hidden");
+  save();
+}
+
+function dismissOnboardingAndSetup(){
+  dismissOnboarding();
+  showTab("setup");
 }
 
 load();

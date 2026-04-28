@@ -42,7 +42,6 @@ body{
   position:relative;
 }
 
-/* Aviation line-art background */
 body::before{
   content:"";
   position:fixed;
@@ -67,7 +66,6 @@ body::after{
   pointer-events:none;
 }
 
-/* Header */
 header{
   background:linear-gradient(135deg,rgba(2,6,23,.94),rgba(15,23,42,.86));
   border-bottom:1px solid var(--border);
@@ -108,7 +106,6 @@ header{
   line-height:1.35;
 }
 
-/* Gauges */
 .summary{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(128px,1fr));
@@ -159,7 +156,6 @@ body:not(.dashboard-active) .summary{
 .g-green{color:var(--green)}
 .g-blue{color:#60a5fa}
 
-/* App */
 .app{
   max-width:1380px;
   margin:0 auto;
@@ -168,7 +164,6 @@ body:not(.dashboard-active) .summary{
   z-index:1;
 }
 
-/* Folder tabs */
 .tabs{
   display:flex;
   gap:3px;
@@ -207,7 +202,6 @@ body:not(.dashboard-active) .summary{
   box-shadow:0 7px 18px rgba(0,0,0,.24);
 }
 
-/* Layout */
 .panel{
   background:rgba(255,255,255,.92);
   color:#172033;
@@ -304,7 +298,6 @@ button.restore{background:#16a34a}
   color:#64748b;
 }
 
-/* Cards */
 .cards{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(225px,1fr));
@@ -412,7 +405,6 @@ button.restore{background:#16a34a}
 .card.overdue .progress-fill{background:var(--red)}
 .card.missing .progress-fill{background:#64748b}
 
-/* Timeline */
 .timeline{
   margin-bottom:12px;
   background:rgba(255,255,255,.10);
@@ -430,20 +422,45 @@ button.restore{background:#16a34a}
 }
 
 .timeline-track{
-  display:flex;
-  gap:6px;
-  overflow-x:auto;
-  padding-bottom:2px;
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:8px;
 }
 
 .timeline-pill{
-  min-width:120px;
+  border:none;
+  min-height:54px;
   padding:8px 10px;
-  border-radius:999px;
+  border-radius:16px;
   color:white;
   font-size:12px;
   font-weight:bold;
-  white-space:nowrap;
+  cursor:pointer;
+  text-align:left;
+  box-shadow:0 6px 16px rgba(0,0,0,.18);
+  transition:transform .15s ease, box-shadow .15s ease;
+}
+
+.timeline-pill:hover{
+  transform:translateY(-2px);
+  box-shadow:0 10px 24px rgba(0,0,0,.24);
+}
+
+.timeline-item-title{
+  display:block;
+  white-space:normal;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  line-height:1.15;
+  max-height:2.3em;
+}
+
+.timeline-item-status{
+  display:block;
+  margin-top:4px;
+  font-size:11px;
+  opacity:.88;
+  line-height:1.15;
 }
 
 .empty-state{
@@ -484,7 +501,6 @@ body.dashboard-active #dashboardTab{
   border-radius:0;
 }
 
-/* Onboarding */
 .onboarding{
   position:fixed;
   inset:0;
@@ -742,7 +758,7 @@ body.dashboard-active #dashboardTab{
 </div>
 
 <script>
-const STORAGE_KEY="aircraftPilotTrackerProV1";
+const STORAGE_KEY="aircraftPilotTrackerProV2";
 const DEFAULT_EXPIRED_DATE="2020-01-01";
 
 let profile={
@@ -1042,7 +1058,11 @@ function renderTimeline(){
       ${upcoming.map(i=>{
         const s=statusFor(i.dueDate);
         const color=s==="overdue"?"red":s==="warning"?"orange":"green";
-        return `<div class="timeline-pill ${color}">${esc(i.title)} · ${esc(statusText(i.dueDate))}</div>`;
+        return `
+          <button class="timeline-pill ${color}" onclick="goToSetting('${i.id||""}')">
+            <span class="timeline-item-title">${esc(i.title)}</span>
+            <span class="timeline-item-status">${esc(statusText(i.dueDate))}</span>
+          </button>`;
       }).join("")}
     </div>`;
 }
@@ -1146,7 +1166,7 @@ function deleteCustomItem(id){
 
 function backupData(){
   save();
-  const data={app:"Aircraft & Pilot Compliance Tracker",version:"3.0",exportedAt:new Date().toISOString(),profile,customItems};
+  const data={app:"Aircraft & Pilot Compliance Tracker",version:"3.1",exportedAt:new Date().toISOString(),profile,customItems};
   const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
   const url=URL.createObjectURL(blob);
   const a=document.createElement("a");

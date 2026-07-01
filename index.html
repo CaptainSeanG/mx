@@ -311,6 +311,40 @@ button.secondary{background:#475569}
   color:#64748b;
 }
 
+.two-col{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+}
+
+.currency-box{
+  border:1px solid #dbe3ef;
+  border-radius:14px;
+  padding:10px;
+  margin-top:10px;
+  background:#f8fafc;
+}
+
+.currency-box label:first-child{
+  margin-top:0;
+}
+
+.field-note{
+  font-size:12px;
+  color:#64748b;
+  margin-top:4px;
+}
+
+.mode-inputs{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+}
+
+.mode-inputs .span2{
+  grid-column:1/-1;
+}
+
 .portable-status{
   display:flex;
   justify-content:space-between;
@@ -635,6 +669,8 @@ body.dashboard-active #dashboardTab{
   .mini-panel{text-align:left}
   .tab{font-size:11px;padding:6px 8px 7px}
   .tool-row{grid-template-columns:1fr}
+  .mode-inputs{grid-template-columns:1fr}
+  .mode-inputs .span2{grid-column:auto}
 }
 </style>
 </head>
@@ -739,17 +775,7 @@ body.dashboard-active #dashboardTab{
         <label>Medical / BasicMed Exam Date</label>
         <input id="medicalLast" type="date">
 
-        <label>Flight Review Last Completed</label>
-        <input id="flightReviewLast" type="date">
-
-        <label>Day Passenger Currency Last Completed</label>
-        <input id="dayCurrencyLast" type="date">
-
-        <label>Night Passenger Currency Last Completed</label>
-        <input id="nightCurrencyLast" type="date">
-
-        <label>Instrument Currency Last Completed</label>
-        <input id="instrumentCurrencyLast" type="date">
+        <div id="pilotCurrencyFields"></div>
 
         <button onclick="saveProfile()">Save Pilot Profile</button>
 
@@ -816,6 +842,25 @@ body.dashboard-active #dashboardTab{
         <input id="vorLast" type="date">
         <div class="helper">Shown when “Flies IFR” is selected.</div>
 
+        <div class="data-tools">
+          <h2 class="section-title">Oil Change Tracking</h2>
+          <label>Last Oil Change Date</label>
+          <input id="oilChangeDate" type="date">
+          <div class="two-col">
+            <div>
+              <label>Hobbs at Oil Change</label>
+              <input id="oilChangeHobbs" type="number" step="0.1" inputmode="decimal">
+            </div>
+            <div>
+              <label>Current Hobbs</label>
+              <input id="currentHobbs" type="number" step="0.1" inputmode="decimal">
+            </div>
+          </div>
+          <label>Oil Change Interval Hours</label>
+          <input id="oilChangeIntervalHours" type="number" step="0.1" inputmode="decimal">
+          <div class="helper">Hobbs fields are optional. If left blank, the tracker shows days since oil change only.</div>
+        </div>
+
         <button onclick="saveProfile()">Save Aircraft Profile</button>
       </div>
     </div>
@@ -874,6 +919,12 @@ const PORTABLE_HANDLE_DB="mxCurrencyPortableFile";
 const PORTABLE_HANDLE_STORE="handles";
 const PORTABLE_HANDLE_KEY="dataFile";
 const DEFAULT_EXPIRED_DATE="2020-01-01";
+const PILOT_CURRENCY=[
+  {key:"flightReview",legacy:"flightReviewLast",title:"Flight Review",cat:"Proficiency",modeKey:"flightReviewMode",dueKey:"flightReviewDue",daysKey:"flightReviewDueDays",lastLabel:"Flight Review Last Completed",notes:"24 calendar months",calc:d=>addMonthsEndOfMonth(d,24)},
+  {key:"dayCurrency",legacy:"dayCurrencyLast",title:"Day Passenger Currency",cat:"Currency",modeKey:"dayCurrencyMode",dueKey:"dayCurrencyDue",daysKey:"dayCurrencyDueDays",lastLabel:"Day Passenger Currency Last Completed",notes:"3 takeoffs and landings within preceding 90 days.",calc:d=>addDays(d,90)},
+  {key:"nightCurrency",legacy:"nightCurrencyLast",title:"Night Passenger Currency",cat:"Currency",modeKey:"nightCurrencyMode",dueKey:"nightCurrencyDue",daysKey:"nightCurrencyDueDays",lastLabel:"Night Passenger Currency Last Completed",notes:"3 full-stop takeoffs and landings within preceding 90 days.",calc:d=>addDays(d,90)},
+  {key:"instrumentCurrency",legacy:"instrumentCurrencyLast",title:"Instrument Currency",cat:"IFR",modeKey:"instrumentCurrencyMode",dueKey:"instrumentCurrencyDue",daysKey:"instrumentCurrencyDueDays",lastLabel:"Instrument Currency Last Completed",notes:"6 calendar months: approaches, holding, intercepting/tracking.",calc:d=>addMonthsEndOfMonth(d,6)}
+];
 
 let profile={
   pilotCertificate:"Private",
@@ -889,6 +940,18 @@ let profile={
   dayCurrencyLast:"",
   nightCurrencyLast:"",
   instrumentCurrencyLast:"",
+  flightReviewMode:"last",
+  flightReviewDue:"",
+  flightReviewDueDays:"",
+  dayCurrencyMode:"last",
+  dayCurrencyDue:"",
+  dayCurrencyDueDays:"",
+  nightCurrencyMode:"last",
+  nightCurrencyDue:"",
+  nightCurrencyDueDays:"",
+  instrumentCurrencyMode:"last",
+  instrumentCurrencyDue:"",
+  instrumentCurrencyDueDays:"",
   nNumber:"",
   aircraftType:"",
   ifrAircraft:true,
@@ -899,7 +962,11 @@ let profile={
   staticLast:"",
   eltLast:"",
   eltBatteryDue:"",
-  vorLast:""
+  vorLast:"",
+  oilChangeDate:"",
+  oilChangeHobbs:"",
+  currentHobbs:"",
+  oilChangeIntervalHours:""
 };
 
 let customItems=[];
@@ -955,7 +1022,19 @@ function localStateEnvelope(savedAt=lastSavedAt || nowISO()){
     flightReviewLast:profile.flightReviewLast,
     dayCurrencyLast:profile.dayCurrencyLast,
     nightCurrencyLast:profile.nightCurrencyLast,
-    instrumentCurrencyLast:profile.instrumentCurrencyLast
+    instrumentCurrencyLast:profile.instrumentCurrencyLast,
+    flightReviewMode:profile.flightReviewMode,
+    flightReviewDue:profile.flightReviewDue,
+    flightReviewDueDays:profile.flightReviewDueDays,
+    dayCurrencyMode:profile.dayCurrencyMode,
+    dayCurrencyDue:profile.dayCurrencyDue,
+    dayCurrencyDueDays:profile.dayCurrencyDueDays,
+    nightCurrencyMode:profile.nightCurrencyMode,
+    nightCurrencyDue:profile.nightCurrencyDue,
+    nightCurrencyDueDays:profile.nightCurrencyDueDays,
+    instrumentCurrencyMode:profile.instrumentCurrencyMode,
+    instrumentCurrencyDue:profile.instrumentCurrencyDue,
+    instrumentCurrencyDueDays:profile.instrumentCurrencyDueDays
   };
 
   const aircraftData={
@@ -969,7 +1048,11 @@ function localStateEnvelope(savedAt=lastSavedAt || nowISO()){
     staticLast:profile.staticLast,
     eltLast:profile.eltLast,
     eltBatteryDue:profile.eltBatteryDue,
-    vorLast:profile.vorLast
+    vorLast:profile.vorLast,
+    oilChangeDate:profile.oilChangeDate,
+    oilChangeHobbs:profile.oilChangeHobbs,
+    currentHobbs:profile.currentHobbs,
+    oilChangeIntervalHours:profile.oilChangeIntervalHours
   };
 
   return {
@@ -1110,6 +1193,11 @@ function daysUntil(d){
   return Math.ceil((new Date(d+"T00:00:00")-t)/86400000);
 }
 
+function daysSince(d){
+  if(!d)return null;
+  return -daysUntil(d);
+}
+
 function ageOnDate(birthDate,targetDate){
   if(!birthDate || !targetDate)return null;
   const b=new Date(birthDate+"T00:00:00");
@@ -1140,7 +1228,8 @@ function medicalPrivilegeMonths(medicalClass,privilege,birthDate,examDate){
   return null;
 }
 
-function statusFor(d){
+function statusFor(d,item){
+  if(item&&item.statusOverride)return item.statusOverride;
   if(!d)return "missing";
   let n=daysUntil(d);
   if(n<0)return "overdue";
@@ -1156,7 +1245,8 @@ function statusText(d){
   return `Due in ${n} days`;
 }
 
-function heroText(d){
+function heroText(d,item){
+  if(item&&item.hero)return item.hero;
   if(!d)return "DATE NEEDED";
   let n=daysUntil(d);
   if(n<0)return `${Math.abs(n)} DAYS LATE`;
@@ -1164,7 +1254,8 @@ function heroText(d){
   return `${n} DAYS LEFT`;
 }
 
-function progressPercent(d){
+function progressPercent(d,item){
+  if(item&&typeof item.progress==="number")return item.progress;
   if(!d)return 0;
   let n=daysUntil(d);
   if(n<0)return 100;
@@ -1174,6 +1265,7 @@ function progressPercent(d){
 
 function iconFor(item){
   const t=(item.title+" "+item.category).toLowerCase();
+  if(t.includes("oil"))return "OIL";
   if(t.includes("medical")||t.includes("basicmed"))return "✚";
   if(t.includes("night"))return "☾";
   if(t.includes("instrument")||t.includes("ifr")||t.includes("vor")||t.includes("static"))return "☁";
@@ -1434,7 +1526,7 @@ function setVal(id,v){
   let e=document.getElementById(id);
   if(!e)return;
   if(e.type==="checkbox")e.checked=!!v;
-  else e.value=v||"";
+  else e.value=v??"";
 }
 
 function getVal(id){
@@ -1447,8 +1539,52 @@ function syncProfileFromForm(){
   Object.keys(profile).forEach(k=>profile[k]=getVal(k));
 }
 
+function renderPilotCurrencyFields(){
+  const root=document.getElementById("pilotCurrencyFields");
+  if(!root)return;
+  root.innerHTML=PILOT_CURRENCY.map(c=>`
+    <div class="currency-box" id="${c.key}Box">
+      <label>${c.title}</label>
+      <select id="${c.modeKey}" onchange="updatePilotModeVisibility('${c.key}')">
+        <option value="last">Last Completed</option>
+        <option value="due">Due Date</option>
+        <option value="days">Due in Days</option>
+      </select>
+      <div class="mode-inputs">
+        <div id="${c.key}LastWrap" class="span2">
+          <label>${c.lastLabel}</label>
+          <input id="${c.legacy}" type="date">
+        </div>
+        <div id="${c.key}DueWrap" class="span2 hidden">
+          <label>${c.title} Due Date</label>
+          <input id="${c.dueKey}" type="date">
+        </div>
+        <div id="${c.key}DaysWrap" class="span2 hidden">
+          <label>${c.title} Due in Days</label>
+          <input id="${c.daysKey}" type="number" min="0" step="1" inputmode="numeric">
+        </div>
+      </div>
+      <div class="field-note" id="${c.key}Note"></div>
+    </div>`).join("");
+}
+
+function updatePilotModeVisibility(key){
+  const c=PILOT_CURRENCY.find(x=>x.key===key);
+  if(!c)return;
+  const mode=getVal(c.modeKey)||"last";
+  document.getElementById(`${key}LastWrap`).classList.toggle("hidden",mode!=="last");
+  document.getElementById(`${key}DueWrap`).classList.toggle("hidden",mode!=="due");
+  document.getElementById(`${key}DaysWrap`).classList.toggle("hidden",mode!=="days");
+  let note="";
+  if(mode==="last")note="Uses the original calculation from the last completed date.";
+  if(mode==="due")note="Uses this due date directly.";
+  if(mode==="days")note="Calculates due date from today plus the number of days entered.";
+  document.getElementById(`${key}Note`).textContent=note;
+}
+
 function populate(){
   Object.keys(profile).forEach(k=>setVal(k,profile[k]));
+  PILOT_CURRENCY.forEach(c=>updatePilotModeVisibility(c.key));
 }
 
 function initDirtyTracking(){
@@ -1493,26 +1629,79 @@ function medicalRules(){
   return rules;
 }
 
+function dueFromPilotConfig(c){
+  const mode=profile[c.modeKey]||"last";
+  if(mode==="due")return profile[c.dueKey]||"";
+  if(mode==="days")return profile[c.daysKey]!=="" ? addDays(todayISO(),Number(profile[c.daysKey])) : "";
+  return c.calc(profile[c.legacy]);
+}
+
+function pilotRuleFromConfig(c){
+  const mode=profile[c.modeKey]||"last";
+  let modeNote=c.notes;
+  if(mode==="due")modeNote="Manual due date entered by user.";
+  if(mode==="days")modeNote=`Manual countdown: due in ${profile[c.daysKey]||"?"} days from today.`;
+  return {
+    id:c.modeKey,
+    type:"Pilot",
+    category:c.cat,
+    title:c.title,
+    dueDate:dueFromPilotConfig(c),
+    notes:modeNote
+  };
+}
+
 function pilotRules(){
-  let a=[
-    {id:"flightReviewLast",type:"Pilot",category:"Proficiency",title:"Flight Review",dueDate:addMonthsEndOfMonth(profile.flightReviewLast,24),notes:"24 calendar months"}
-  ];
+  let a=[pilotRuleFromConfig(PILOT_CURRENCY[0])];
 
   a.push(...medicalRules());
 
   if(profile.carriesPassengers){
-    a.push({id:"dayCurrencyLast",type:"Pilot",category:"Currency",title:"Day Passenger Currency",dueDate:addDays(profile.dayCurrencyLast,90),notes:"3 takeoffs and landings within preceding 90 days."});
+    a.push(pilotRuleFromConfig(PILOT_CURRENCY[1]));
   }
 
   if(profile.carriesNightPassengers){
-    a.push({id:"nightCurrencyLast",type:"Pilot",category:"Currency",title:"Night Passenger Currency",dueDate:addDays(profile.nightCurrencyLast,90),notes:"3 full-stop takeoffs and landings within preceding 90 days."});
+    a.push(pilotRuleFromConfig(PILOT_CURRENCY[2]));
   }
 
   if(profile.instrumentRated&&profile.fliesIFR){
-    a.push({id:"instrumentCurrencyLast",type:"Pilot",category:"IFR",title:"Instrument Currency",dueDate:addMonthsEndOfMonth(profile.instrumentCurrencyLast,6),notes:"6 calendar months: approaches, holding, intercepting/tracking."});
+    a.push(pilotRuleFromConfig(PILOT_CURRENCY[3]));
   }
 
   return a;
+}
+
+function oilRule(){
+  if(!profile.oilChangeDate && !profile.oilChangeHobbs && !profile.currentHobbs)return null;
+  const since=daysSince(profile.oilChangeDate);
+  const h0=parseFloat(profile.oilChangeHobbs);
+  const h1=parseFloat(profile.currentHobbs);
+  const interval=parseFloat(profile.oilChangeIntervalHours);
+  const hasHours=!Number.isNaN(h0)&&!Number.isNaN(h1);
+  const hours=hasHours ? Math.max(0,h1-h0) : null;
+  let notes=[];
+  if(since!==null)notes.push(`${since} days since oil change`);
+  if(hours!==null)notes.push(`${hours.toFixed(1)} hours on oil`);
+  let item={
+    id:"oilChangeDate",
+    type:"Aircraft",
+    category:"Maintenance",
+    title:"Oil Change",
+    dueDate:"",
+    notes:notes.join(" · ") || "Enter oil change date or Hobbs values.",
+    hero:since!==null ? `${since} DAYS AGO` : "OIL TRACKING",
+    statusOverride:"current",
+    progress:10
+  };
+  if(hours!==null && !Number.isNaN(interval) && interval>0){
+    const remain=interval-hours;
+    item.hero=remain<0 ? `${Math.abs(remain).toFixed(1)} HRS OVER` : `${remain.toFixed(1)} HRS LEFT`;
+    item.notes=`${notes.join(" · ")} · ${interval} hour interval`;
+    item.statusOverride=remain<0 ? "overdue" : remain<=5 ? "warning" : "current";
+    item.progress=Math.max(8,Math.min(100,100-(Math.max(0,remain)/interval*100)));
+    item.dueDate=addDays(todayISO(),Math.max(0,Math.ceil(remain/2)));
+  }
+  return item;
 }
 
 function aircraftRules(){
@@ -1537,6 +1726,9 @@ function aircraftRules(){
     a.push({id:"vorLast",type:"Aircraft",category:"IFR",title:"VOR Check",dueDate:addDays(profile.vorLast,30),notes:"30 days when using VOR equipment for IFR operations."});
   }
 
+  const oil=oilRule();
+  if(oil)a.push(oil);
+
   return a;
 }
 
@@ -1545,11 +1737,11 @@ function allItems(){
 }
 
 function renderCard(i,del=false){
-  let s=statusFor(i.dueDate);
+  let s=statusFor(i.dueDate,i);
   let badge=s==="overdue"?"red":s==="warning"?"orange":s==="missing"?"gray":"green";
   let cls=s==="overdue"?"card overdue":s==="warning"?"card warning":s==="missing"?"card missing":"card";
   let click=del?"":`onclick="goToSetting('${i.id||""}')"`; 
-  let pct=progressPercent(i.dueDate);
+  let pct=progressPercent(i.dueDate,i);
 
   return `
   <div class="${cls}" ${click}>
@@ -1557,10 +1749,10 @@ function renderCard(i,del=false){
       <span class="badge ${badge}">${s==="overdue"?"PAST DUE":s==="warning"?"DUE SOON":s==="missing"?"NEEDS DATE":"CURRENT"}</span>
       <div class="icon">${iconFor(i)}</div>
     </div>
-    <div class="days-hero">${esc(heroText(i.dueDate))}</div>
+    <div class="days-hero">${esc(heroText(i.dueDate,i))}</div>
     <h3>${esc(i.title)}</h3>
     <p><strong>${esc(i.type)}</strong> · ${esc(i.category)}</p>
-    <p><strong>Due:</strong> ${esc(i.dueDate||"Date needed")}</p>
+    ${i.dueDate ? `<p><strong>Due:</strong> ${esc(i.dueDate)}</p>` : ""}
     <div class="progress"><div class="progress-fill" style="width:${pct}%"></div></div>
     <p class="meta">${esc(i.notes||"")}</p>
     ${del?`<button class="delete" onclick="deleteCustomItem(${i.id})">Delete</button>`:""}
@@ -1574,7 +1766,7 @@ function renderList(id,list,del=false){
     return;
   }
   el.innerHTML=list
-    .sort((a,b)=>daysUntil(a.dueDate)-daysUntil(b.dueDate))
+    .sort((a,b)=>daysUntil(a.dueDate||"2999-01-01")-daysUntil(b.dueDate||"2999-01-01"))
     .map(x=>renderCard(x,del)).join("");
 }
 
@@ -1593,7 +1785,7 @@ function renderTimeline(){
     <div class="timeline-title">Next Up / Compliance Timeline</div>
     <div class="timeline-track">
       ${upcoming.map(i=>{
-        const s=statusFor(i.dueDate);
+        const s=statusFor(i.dueDate,i);
         const color=s==="overdue"?"red":s==="warning"?"orange":"green";
         return `
           <button class="timeline-pill ${color}" onclick="goToSetting('${i.id||""}')">
@@ -1607,7 +1799,7 @@ function renderTimeline(){
 function renderCounts(){
   let o=0,w=0,c=0;
   allItems().forEach(i=>{
-    let s=statusFor(i.dueDate);
+    let s=statusFor(i.dueDate,i);
     if(s==="overdue")o++;
     if(s==="warning")w++;
     if(s==="current")c++;
@@ -1712,7 +1904,7 @@ function backupData(){
   save(false);
   hasUnsavedChanges=wasDirty;
   renderStorageStatus();
-  const data={app:"Aircraft & Pilot Compliance Tracker",version:"3.1",exportedAt:new Date().toISOString(),profile,customItems};
+  const data={app:"Aircraft & Pilot Compliance Tracker",version:"3.2",exportedAt:new Date().toISOString(),profile,customItems};
   const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
   const url=URL.createObjectURL(blob);
   const a=document.createElement("a");
@@ -1777,6 +1969,7 @@ function dismissOnboardingAndSetup(){
 async function initApp(){
   load();
   seed();
+  renderPilotCurrencyFields();
   populate();
   initDirtyTracking();
   renderAll();

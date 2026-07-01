@@ -235,6 +235,18 @@ body:not(.dashboard-active) .summary{
   font-size:20px;
 }
 
+.version-label{
+  display:inline-block;
+  margin:0 0 12px;
+  padding:4px 8px;
+  border-radius:999px;
+  background:#e2e8f0;
+  color:#334155;
+  font-family:monospace;
+  font-size:11px;
+  font-weight:bold;
+}
+
 label{
   display:block;
   font-weight:bold;
@@ -280,6 +292,7 @@ button{
 button.delete{background:#991b1b}
 button.backup{background:#2563eb}
 button.restore{background:#16a34a}
+button.secondary{background:#475569}
 
 .helper{
   font-size:12px;
@@ -296,6 +309,77 @@ button.restore{background:#16a34a}
 .data-tools p{
   font-size:13px;
   color:#64748b;
+}
+
+.portable-status{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  align-items:flex-start;
+  padding:10px;
+  margin:8px 0 10px;
+  background:#f8fafc;
+  border:1px solid #dbe3ef;
+  border-radius:10px;
+}
+
+.portable-status strong{
+  display:block;
+  font-size:13px;
+}
+
+.portable-status span{
+  display:block;
+  color:#64748b;
+  font-size:12px;
+  margin-top:3px;
+  line-height:1.35;
+}
+
+.dirty-status{
+  display:inline-block;
+  margin-top:7px;
+  padding:3px 7px;
+  border-radius:999px;
+  background:#dcfce7;
+  color:#166534;
+  font-size:11px;
+  font-weight:bold;
+}
+
+.dirty-status.dirty{
+  background:#fff7ed;
+  color:#9a3412;
+}
+
+.status-dot{
+  flex:0 0 10px;
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  margin-top:4px;
+  background:#64748b;
+}
+
+.status-dot.file{background:#16a34a}
+.status-dot.local{background:#2563eb}
+.status-dot.disconnected{background:#f97316}
+
+.tool-row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+}
+
+.setup-note{
+  padding:9px 10px;
+  margin:10px 0;
+  background:#eff6ff;
+  border-left:4px solid #2563eb;
+  border-radius:8px;
+  color:#334155;
+  font-size:12px;
+  line-height:1.35;
 }
 
 .cards{
@@ -550,6 +634,7 @@ body.dashboard-active #dashboardTab{
   .setup-grid,.grid{grid-template-columns:1fr}
   .mini-panel{text-align:left}
   .tab{font-size:11px;padding:6px 8px 7px}
+  .tool-row{grid-template-columns:1fr}
 }
 </style>
 </head>
@@ -669,6 +754,27 @@ body.dashboard-active #dashboardTab{
         <button onclick="saveProfile()">Save Pilot Profile</button>
 
         <div class="data-tools">
+          <h2 class="section-title">Portable Data File</h2>
+          <div class="version-label" id="setupVersionLabel">Version loading...</div>
+          <div class="portable-status">
+            <div>
+              <strong id="portableStatusTitle">Using local browser storage</strong>
+              <span id="portableStatusDetail">Portable file not connected.</span>
+              <em id="dirtyStatus" class="dirty-status">All changes saved</em>
+            </div>
+            <div class="status-dot local" id="portableStatusDot"></div>
+          </div>
+          <p>For cross-computer use, create/select Documents/MX_Currency/mx_currency_data.json.</p>
+          <div class="tool-row">
+            <button class="restore" onclick="loadPortableDataFile()">Load Data File</button>
+            <button class="backup" onclick="savePortableDataFile()">Save Data File</button>
+          </div>
+          <button class="secondary" onclick="exportPortableDataFile()">Export current data to JSON</button>
+          <input id="portableFileInput" class="hidden" type="file" accept="application/json">
+          <div class="setup-note">
+            Save Data File writes back to the active file in Chrome/Edge when permission is granted. If direct save is not available, Save downloads mx_currency_data.json as a fallback copy. Export and Backup always create separate downloadable copies. For best results, store mx_currency_data.json inside a cloud-synced folder like OneDrive, Google Drive, Dropbox, or iCloud Drive. GitHub Pages cannot automatically scan Documents folders for security reasons.
+          </div>
+
           <h2 class="section-title">Backup / Restore</h2>
           <p>Data is saved in this browser. Use backup/restore to move it to another computer or protect against browser data loss.</p>
           <button class="backup" onclick="backupData()">Backup My Data</button>
@@ -758,7 +864,15 @@ body.dashboard-active #dashboardTab{
 </div>
 
 <script>
+const APP_VERSION="v1.1-portable-file-save";
+const APP_BUILD_UPDATED_AT="2026-07-01T05:39:20Z";
 const STORAGE_KEY="aircraftPilotTrackerProV2";
+const PORTABLE_APP_NAME="MX Currency Tracker";
+const PORTABLE_SCHEMA_VERSION=1;
+const PORTABLE_FILENAME="mx_currency_data.json";
+const PORTABLE_HANDLE_DB="mxCurrencyPortableFile";
+const PORTABLE_HANDLE_STORE="handles";
+const PORTABLE_HANDLE_KEY="dataFile";
 const DEFAULT_EXPIRED_DATE="2020-01-01";
 
 let profile={
@@ -789,8 +903,192 @@ let profile={
 };
 
 let customItems=[];
+let lastSavedAt="";
+let portableFileHandle=null;
+let portableFileConnected=false;
+let portableStatusMode="local";
+let portableStatusDetail="Portable file not connected.";
+let activeFileName="";
+let lastLoadedAt="";
+let lastPortableSavedAt="";
+let hasUnsavedChanges=false;
 
 function todayISO(){return new Date().toISOString().slice(0,10);}
+
+function nowISO(){return new Date().toISOString();}
+
+function isFileSystemAccessSupported(){
+  return "showOpenFilePicker" in window && "showSaveFilePicker" in window;
+}
+
+function directSaveSupported(){
+  return !!portableFileHandle && isFileSystemAccessSupported();
+}
+
+function activeFileLabel(){
+  return activeFileName || (portableFileHandle && portableFileHandle.name) || PORTABLE_FILENAME;
+}
+
+function formatTimestamp(ts){
+  if(!ts)return "Not yet";
+  const d=new Date(ts);
+  if(Number.isNaN(d.getTime()))return ts;
+  return d.toLocaleString();
+}
+
+function setDirty(isDirty){
+  hasUnsavedChanges=!!isDirty;
+  renderStorageStatus();
+}
+
+function localStateEnvelope(savedAt=lastSavedAt || nowISO()){
+  const pilotCurrencyData={
+    pilotCertificate:profile.pilotCertificate,
+    birthDate:profile.birthDate,
+    instrumentRated:profile.instrumentRated,
+    fliesIFR:profile.fliesIFR,
+    carriesPassengers:profile.carriesPassengers,
+    carriesNightPassengers:profile.carriesNightPassengers,
+    usesBasicMed:profile.usesBasicMed,
+    medicalClass:profile.medicalClass,
+    medicalLast:profile.medicalLast,
+    flightReviewLast:profile.flightReviewLast,
+    dayCurrencyLast:profile.dayCurrencyLast,
+    nightCurrencyLast:profile.nightCurrencyLast,
+    instrumentCurrencyLast:profile.instrumentCurrencyLast
+  };
+
+  const aircraftData={
+    nNumber:profile.nNumber,
+    aircraftType:profile.aircraftType,
+    ifrAircraft:profile.ifrAircraft,
+    hasTransponder:profile.hasTransponder,
+    hasELT:profile.hasELT,
+    annualLast:profile.annualLast,
+    transponderLast:profile.transponderLast,
+    staticLast:profile.staticLast,
+    eltLast:profile.eltLast,
+    eltBatteryDue:profile.eltBatteryDue,
+    vorLast:profile.vorLast
+  };
+
+  return {
+    appName:PORTABLE_APP_NAME,
+    schemaVersion:PORTABLE_SCHEMA_VERSION,
+    lastSavedAt:savedAt,
+    userProfile:{
+      settings:{
+        suggestedFolder:"Documents/MX_Currency",
+        suggestedFilename:PORTABLE_FILENAME
+      },
+      profile:{...profile}
+    },
+    aircraftData,
+    pilotCurrencyData,
+    maintenanceCurrencyItems:{
+      generatedItems:[...pilotRules(),...aircraftRules()],
+      customItems:[...customItems]
+    },
+    existingTrackerState:{
+      storageKey:STORAGE_KEY,
+      profile:{...profile},
+      customItems:[...customItems],
+      onboarded:true,
+      lastSavedAt:savedAt
+    }
+  };
+}
+
+function validatePortableData(data){
+  if(!data || typeof data!=="object")throw new Error("The file is not valid JSON data.");
+  if(data.appName!==PORTABLE_APP_NAME && data.appName!=="Aircraft & Pilot Compliance Tracker"){
+    throw new Error("This JSON file is for a different app.");
+  }
+  if(!data.schemaVersion)throw new Error("Missing schemaVersion.");
+  if(!data.lastSavedAt || Number.isNaN(Date.parse(data.lastSavedAt))){
+    throw new Error("Missing or invalid lastSavedAt timestamp.");
+  }
+  const portableProfile=data.userProfile && data.userProfile.profile;
+  const legacyProfile=data.profile;
+  if(!portableProfile && !legacyProfile){
+    throw new Error("Missing userProfile/profile data.");
+  }
+  return true;
+}
+
+function profileFromPortableData(data){
+  return (data.userProfile && data.userProfile.profile) || data.profile || {};
+}
+
+function customItemsFromPortableData(data){
+  if(data.maintenanceCurrencyItems && Array.isArray(data.maintenanceCurrencyItems.customItems)){
+    return data.maintenanceCurrencyItems.customItems;
+  }
+  if(Array.isArray(data.customItems))return data.customItems;
+  if(data.existingTrackerState && Array.isArray(data.existingTrackerState.customItems)){
+    return data.existingTrackerState.customItems;
+  }
+  return [];
+}
+
+function localSavedAt(){
+  const raw=localStorage.getItem(STORAGE_KEY);
+  if(!raw)return "";
+  try{
+    const data=JSON.parse(raw);
+    return data.lastSavedAt || data.exportedAt || "";
+  }catch(err){
+    return "";
+  }
+}
+
+function timestampIsNewer(a,b){
+  if(!a)return false;
+  if(!b)return true;
+  return Date.parse(a)>Date.parse(b);
+}
+
+function setPortableStatus(mode,detail){
+  portableStatusMode=mode;
+  portableStatusDetail=detail;
+  renderStorageStatus();
+  renderHeaderProfile();
+}
+
+function renderStorageStatus(){
+  const title={
+    file:"Using portable data file",
+    local:"Using local browser storage",
+    disconnected:"Portable file not connected"
+  }[portableStatusMode] || "Using local browser storage";
+  const titleEl=document.getElementById("portableStatusTitle");
+  const detailEl=document.getElementById("portableStatusDetail");
+  const dotEl=document.getElementById("portableStatusDot");
+  const dirtyEl=document.getElementById("dirtyStatus");
+  const fileName=activeFileName || (portableFileHandle && portableFileHandle.name) || "None selected";
+  const directText=directSaveSupported()
+    ? "Direct save supported when permission is granted"
+    : "Direct save unavailable; Save will download a fallback copy";
+  const pathText=portableStatusMode==="file"
+    ? `Browser exposes the file name only, not the full path. Suggested path: Documents/MX_Currency/${PORTABLE_FILENAME}`
+    : `Suggested path: Documents/MX_Currency/${PORTABLE_FILENAME}`;
+  const savedDisplay=portableStatusMode==="file" ? lastPortableSavedAt : lastSavedAt;
+  const details=[
+    portableStatusDetail,
+    `Active file: ${fileName}`,
+    `Last loaded: ${formatTimestamp(lastLoadedAt)}`,
+    `Last saved: ${formatTimestamp(savedDisplay)}`,
+    directText,
+    pathText
+  ].filter(Boolean);
+  if(titleEl)titleEl.textContent=title;
+  if(detailEl)detailEl.innerHTML=details.map(esc).join("<br>");
+  if(dotEl)dotEl.className=`status-dot ${portableStatusMode}`;
+  if(dirtyEl){
+    dirtyEl.textContent=hasUnsavedChanges ? "Unsaved changes" : "All changes saved";
+    dirtyEl.className=hasUnsavedChanges ? "dirty-status dirty" : "dirty-status";
+  }
+}
 
 function addDays(d,n){
   if(!d)return "";
@@ -893,8 +1191,87 @@ function esc(s){
     .replaceAll(">","&gt;");
 }
 
-function save(){
-  localStorage.setItem(STORAGE_KEY,JSON.stringify({profile,customItems,onboarded:true}));
+function openPortableHandleDb(){
+  return new Promise((resolve,reject)=>{
+    const request=indexedDB.open(PORTABLE_HANDLE_DB,1);
+    request.onupgradeneeded=()=>request.result.createObjectStore(PORTABLE_HANDLE_STORE);
+    request.onsuccess=()=>resolve(request.result);
+    request.onerror=()=>reject(request.error);
+  });
+}
+
+async function savePortableHandle(handle){
+  try{
+    const db=await openPortableHandleDb();
+    await new Promise((resolve,reject)=>{
+      const tx=db.transaction(PORTABLE_HANDLE_STORE,"readwrite");
+      tx.objectStore(PORTABLE_HANDLE_STORE).put(handle,PORTABLE_HANDLE_KEY);
+      tx.oncomplete=resolve;
+      tx.onerror=()=>reject(tx.error);
+    });
+    db.close();
+  }catch(err){
+    console.warn("Could not remember portable file handle.",err);
+  }
+}
+
+async function getPortableHandle(){
+  try{
+    const db=await openPortableHandleDb();
+    const handle=await new Promise((resolve,reject)=>{
+      const tx=db.transaction(PORTABLE_HANDLE_STORE,"readonly");
+      const request=tx.objectStore(PORTABLE_HANDLE_STORE).get(PORTABLE_HANDLE_KEY);
+      request.onsuccess=()=>resolve(request.result || null);
+      request.onerror=()=>reject(request.error);
+    });
+    db.close();
+    return handle;
+  }catch(err){
+    console.warn("Could not read remembered portable file handle.",err);
+    return null;
+  }
+}
+
+async function hasFilePermission(handle,write=false,ask=false){
+  if(!handle || !handle.queryPermission)return false;
+  const opts={mode:write?"readwrite":"read"};
+  let permission=await handle.queryPermission(opts);
+  if(permission==="granted")return true;
+  if(ask && handle.requestPermission){
+    permission=await handle.requestPermission(opts);
+    return permission==="granted";
+  }
+  return false;
+}
+
+async function readJsonFromHandle(handle){
+  const file=await handle.getFile();
+  return JSON.parse(await file.text());
+}
+
+async function writeJsonToHandle(handle,data){
+  const writable=await handle.createWritable();
+  await writable.write(JSON.stringify(data,null,2));
+  await writable.close();
+}
+
+function downloadJson(data,filename=PORTABLE_FILENAME){
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;
+  a.download=filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function save(markDirty=true){
+  lastSavedAt=nowISO();
+  localStorage.setItem(STORAGE_KEY,JSON.stringify({profile,customItems,onboarded:true,lastSavedAt}));
+  if(markDirty)setDirty(true);
+  else renderStorageStatus();
 }
 
 function load(){
@@ -902,7 +1279,155 @@ function load(){
   let x=JSON.parse(raw||"{}");
   if(x.profile)profile={...profile,...x.profile};
   if(x.customItems)customItems=x.customItems;
+  lastSavedAt=x.lastSavedAt || "";
   if(!raw) document.getElementById("onboarding").classList.remove("hidden");
+}
+
+function applyPortableData(data,sourceLabel){
+  validatePortableData(data);
+  profile={...profile,...profileFromPortableData(data)};
+  customItems=customItemsFromPortableData(data);
+  lastSavedAt=data.lastSavedAt || nowISO();
+  localStorage.setItem(STORAGE_KEY,JSON.stringify({profile,customItems,onboarded:true,lastSavedAt}));
+  activeFileName=activeFileLabel();
+  lastLoadedAt=nowISO();
+  lastPortableSavedAt=data.lastSavedAt || "";
+  hasUnsavedChanges=false;
+  populate();
+  renderAll();
+  setPortableStatus("file",sourceLabel || `Connected to ${PORTABLE_FILENAME}.`);
+}
+
+async function loadPortableDataFile(){
+  try{
+    let data;
+    if(isFileSystemAccessSupported()){
+      const handles=await window.showOpenFilePicker({
+        multiple:false,
+        types:[{description:"MX currency JSON",accept:{"application/json":[".json"]}}]
+      });
+      portableFileHandle=handles[0];
+      activeFileName=portableFileHandle.name || PORTABLE_FILENAME;
+      await savePortableHandle(portableFileHandle);
+      data=await readJsonFromHandle(portableFileHandle);
+      portableFileConnected=true;
+    }else{
+      const input=document.getElementById("portableFileInput");
+      input.value="";
+      const file=await new Promise(resolve=>{
+        input.onchange=()=>resolve(input.files[0] || null);
+        input.click();
+      });
+      if(!file)return;
+      data=JSON.parse(await file.text());
+      portableFileHandle=null;
+      activeFileName=file.name || PORTABLE_FILENAME;
+      portableFileConnected=false;
+    }
+
+    validatePortableData(data);
+    const localTime=localSavedAt();
+    if(timestampIsNewer(localTime,data.lastSavedAt)){
+      const ok=confirm("Local browser storage is newer than this data file. Load the older file anyway and replace local browser storage?");
+      if(!ok){
+        setPortableStatus("local","Load canceled because local browser storage is newer.");
+        return;
+      }
+    }
+
+    applyPortableData(data,`Loaded ${activeFileLabel()}. Local backup cache updated.`);
+    alert("Data file loaded successfully.");
+    showTab("dashboard");
+  }catch(err){
+    setPortableStatus("disconnected",err.message || "Could not load the portable data file.");
+    alert(`Could not load data file: ${err.message || "Invalid JSON or schema."}`);
+  }
+}
+
+async function savePortableDataFile(){
+  const localBeforeSave=lastSavedAt || localSavedAt();
+  syncProfileFromForm();
+  save();
+  const data=localStateEnvelope(lastSavedAt);
+  const fileName=activeFileLabel();
+
+  if(portableFileHandle && isFileSystemAccessSupported()){
+    try{
+      const canWrite=await hasFilePermission(portableFileHandle,true,true);
+      if(canWrite){
+        try{
+          const existing=await readJsonFromHandle(portableFileHandle);
+          if(existing && timestampIsNewer(existing.lastSavedAt,localBeforeSave)){
+            const ok=confirm("The selected portable data file is newer than local browser storage. Overwrite it with the current local data?");
+            if(!ok){
+              setPortableStatus("file","Save canceled because the portable file is newer.");
+              return;
+            }
+          }
+        }catch(err){
+          console.warn("Could not compare existing portable file timestamp.",err);
+        }
+        await writeJsonToHandle(portableFileHandle,data);
+        portableFileConnected=true;
+        activeFileName=fileName;
+        lastPortableSavedAt=lastSavedAt;
+        setDirty(false);
+        setPortableStatus("file",`Saved to ${fileName} at ${formatTimestamp(lastSavedAt)}.`);
+        alert(`Saved to ${fileName}.`);
+        return;
+      }
+    }catch(err){
+      console.warn("Portable write failed, falling back to download.",err);
+    }
+  }
+
+  downloadJson(data,PORTABLE_FILENAME);
+  lastPortableSavedAt=lastSavedAt;
+  setDirty(false);
+  setPortableStatus(portableFileConnected ? "file" : "local","Direct save was unavailable. Downloaded fallback copy mx_currency_data.json.");
+}
+
+function exportPortableDataFile(){
+  const wasDirty=hasUnsavedChanges;
+  syncProfileFromForm();
+  save(false);
+  downloadJson(localStateEnvelope(lastSavedAt),PORTABLE_FILENAME);
+  hasUnsavedChanges=wasDirty;
+  setPortableStatus(portableFileConnected?"file":"local","Exported a separate JSON copy. Active file was not replaced.");
+}
+
+async function tryRememberedPortableFile(){
+  if(!isFileSystemAccessSupported()){
+    setPortableStatus("local","Using local browser storage. Safari/Firefox may require manual import/export.");
+    return false;
+  }
+  const handle=await getPortableHandle();
+  if(!handle){
+    setPortableStatus("local","Portable file not connected. Select Documents/MX_Currency/mx_currency_data.json once to enable it.");
+    return false;
+  }
+  portableFileHandle=handle;
+  activeFileName=handle.name || PORTABLE_FILENAME;
+  const canRead=await hasFilePermission(handle,false,false);
+  if(!canRead){
+    setPortableStatus("disconnected","Permission is needed again. Use Load Data File to select mx_currency_data.json.");
+    return false;
+  }
+  try{
+    const data=await readJsonFromHandle(handle);
+    validatePortableData(data);
+    const localTime=localSavedAt();
+    if(timestampIsNewer(localTime,data.lastSavedAt)){
+      setPortableStatus("local","Local browser storage is newer than the remembered portable file. Use Save Data File or Load Data File to resolve.");
+      return false;
+    }
+    applyPortableData(data,`Loaded remembered ${PORTABLE_FILENAME}.`);
+    portableFileConnected=true;
+    return true;
+  }catch(err){
+    setPortableStatus("disconnected",`Remembered file could not be loaded: ${err.message || "invalid JSON."}`);
+    return false;
+  }
 }
 
 function setVal(id,v){
@@ -918,8 +1443,20 @@ function getVal(id){
   return e.type==="checkbox"?e.checked:e.value;
 }
 
+function syncProfileFromForm(){
+  Object.keys(profile).forEach(k=>profile[k]=getVal(k));
+}
+
 function populate(){
   Object.keys(profile).forEach(k=>setVal(k,profile[k]));
+}
+
+function initDirtyTracking(){
+  document.querySelectorAll("input,select,textarea").forEach(el=>{
+    if(el.type==="file")return;
+    el.addEventListener("input",()=>setDirty(true));
+    el.addEventListener("change",()=>setDirty(true));
+  });
 }
 
 function medicalRules(){
@@ -1090,8 +1627,13 @@ function renderCounts(){
 function renderHeaderProfile(){
   const aircraft=[profile.nNumber,profile.aircraftType].filter(Boolean).join(" · ") || "Aircraft not set";
   const pilot=[profile.pilotCertificate,profile.instrumentRated?"Instrument":"VFR"].filter(Boolean).join(" · ");
-  profileLine.textContent=`${aircraft} · ${pilot}`;
-  miniPanel.innerHTML=`${profile.fliesIFR?"IFR MODE":"VFR MODE"}<br>${profile.usesBasicMed?"BASICMED":"FAA MEDICAL"} · LOCAL STORAGE`;
+  const storageLabel=portableStatusMode==="file"?"PORTABLE DATA FILE":portableStatusMode==="disconnected"?"PORTABLE FILE NOT CONNECTED":"LOCAL STORAGE";
+  const profileLineEl=document.getElementById("profileLine");
+  const miniPanelEl=document.getElementById("miniPanel");
+  const setupVersionEl=document.getElementById("setupVersionLabel");
+  if(profileLineEl)profileLineEl.textContent=`${aircraft} · ${pilot}`;
+  if(miniPanelEl)miniPanelEl.innerHTML=`${profile.fliesIFR?"IFR MODE":"VFR MODE"}<br>${profile.usesBasicMed?"BASICMED":"FAA MEDICAL"} · ${storageLabel}<br>${APP_VERSION}`;
+  if(setupVersionEl)setupVersionEl.textContent=`${APP_VERSION} · Build/Updated ${APP_BUILD_UPDATED_AT}`;
 }
 
 function renderAll(){
@@ -1126,7 +1668,7 @@ function goToSetting(id){
 }
 
 function saveProfile(){
-  Object.keys(profile).forEach(k=>profile[k]=getVal(k));
+  syncProfileFromForm();
   save();
   renderAll();
   alert("Saved.");
@@ -1165,7 +1707,11 @@ function deleteCustomItem(id){
 }
 
 function backupData(){
-  save();
+  const wasDirty=hasUnsavedChanges;
+  syncProfileFromForm();
+  save(false);
+  hasUnsavedChanges=wasDirty;
+  renderStorageStatus();
   const data={app:"Aircraft & Pilot Compliance Tracker",version:"3.1",exportedAt:new Date().toISOString(),profile,customItems};
   const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
   const url=URL.createObjectURL(blob);
@@ -1220,7 +1766,7 @@ function seed(){
 
 function dismissOnboarding(){
   document.getElementById("onboarding").classList.add("hidden");
-  save();
+  save(false);
 }
 
 function dismissOnboardingAndSetup(){
@@ -1228,11 +1774,18 @@ function dismissOnboardingAndSetup(){
   showTab("setup");
 }
 
-load();
-seed();
-populate();
-renderAll();
-showTab("dashboard");
+async function initApp(){
+  load();
+  seed();
+  populate();
+  initDirtyTracking();
+  renderAll();
+  showTab("dashboard");
+  await tryRememberedPortableFile();
+  renderAll();
+}
+
+initApp();
 </script>
 
 </body>
